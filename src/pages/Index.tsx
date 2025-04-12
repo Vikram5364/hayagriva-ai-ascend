@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -15,7 +15,6 @@ import { features } from '@/data/features';
 import { useTheme } from '@/components/theme-provider';
 import { Switch } from '@/components/ui/switch';
 import { Sun, Moon } from 'lucide-react';
-import VoiceAssistant from '@/components/VoiceAssistant';
 import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
@@ -26,9 +25,47 @@ const Index = () => {
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [speakResponse, setSpeakResponse] = useState(true);
   
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const speakText = (text: string) => {
+    if (!speakResponse) return;
+    
+    const synth = window.speechSynthesis;
+    synth.cancel(); // Stop any current speaking
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Get all available voices
+    const voices = synth.getVoices();
+    
+    // Try to find an Indian English voice
+    const indianVoice = voices.find(voice => 
+      (voice.lang.includes('en-IN') || 
+       voice.name.includes('Indian') || 
+       voice.name.includes('Hindi'))
+    );
+    
+    // Use a male voice preferably with Indian accent, or fallback to any English voice
+    if (indianVoice) {
+      utterance.voice = indianVoice;
+    } else {
+      const englishVoice = voices.find(voice => 
+        voice.lang.includes('en') && voice.name.includes('Male')
+      );
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
+    }
+    
+    // Adjust parameters to simulate Indian accent if needed
+    utterance.rate = 0.9; // Slightly slower
+    utterance.pitch = 1.1; // Slightly higher pitch
+    
+    synth.speak(utterance);
   };
 
   const handleSend = () => {
@@ -51,15 +88,47 @@ const Index = () => {
         { role: 'assistant', content: aiResponse }
       ]);
       
-      // Automatically trigger the voice assistant for AI responses
+      // Automatically speak the AI's response
+      speakText(aiResponse);
+      
+      // Notify user if this is the first message
       if (newMessages.length === 1) {
         toast({
-          title: "Voice Assistant Activated",
-          description: "Hayagriva is now speaking. Click the speaker icon to control voice output."
+          title: "Voice Output Active",
+          description: "Hayagriva is now speaking. The voice output is automatic."
         });
       }
     }, 1000);
   };
+
+  // Initialize speech synthesis
+  useEffect(() => {
+    const synth = window.speechSynthesis;
+    
+    // Initialize voices
+    const populateVoices = () => {
+      synth.getVoices();
+    };
+
+    if (synth.onvoiceschanged !== undefined) {
+      synth.onvoiceschanged = populateVoices;
+    }
+    
+    populateVoices();
+    
+    // Cleanup
+    return () => {
+      synth.cancel();
+    };
+  }, []);
+
+  // Speak new AI messages when they arrive
+  useEffect(() => {
+    const latestMessage = messages[messages.length - 1];
+    if (latestMessage && latestMessage.role === 'assistant') {
+      speakText(latestMessage.content);
+    }
+  }, [messages]);
 
   const toggleListening = () => {
     setIsListening(!isListening);
@@ -185,8 +254,13 @@ const Index = () => {
                   <span className="font-medium">Hayagriva Assistant</span>
                 </div>
                 
-                {/* Voice Assistant component for the latest AI message */}
-                <VoiceAssistant text={latestAIMessage} />
+                {/* Voice toggle replaced with indication that voice is always on */}
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <span className="flex items-center">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1"></span>
+                    Voice Active
+                  </span>
+                </div>
               </div>
               
               <Chat messages={messages} />

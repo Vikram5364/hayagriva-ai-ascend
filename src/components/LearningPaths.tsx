@@ -1,11 +1,28 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Book, Bookmark, Code, Lightbulb, Music, Palette, Beaker } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Book, 
+  Bookmark, 
+  Code, 
+  Lightbulb, 
+  Music, 
+  Palette, 
+  Beaker,
+  Calculator,
+  Binary,
+  Database,
+  Server,
+  Globe,
+  Microscope,
+  Atom,
+  TestTube,
+  BarChart2
+} from 'lucide-react';
 
 interface LearningPath {
   id: string;
@@ -91,9 +108,163 @@ const learningPaths: LearningPath[] = [
       { title: 'Advanced Techniques', completed: false },
     ]
   },
+  {
+    id: '6',
+    title: 'Web Development',
+    description: 'Build modern, responsive websites using the latest web technologies.',
+    category: 'Technology',
+    level: 'Intermediate',
+    icon: Globe,
+    modules: [
+      { title: 'HTML & CSS Fundamentals', completed: false },
+      { title: 'JavaScript Programming', completed: false },
+      { title: 'Frontend Frameworks', completed: false },
+      { title: 'Backend Development', completed: false },
+    ]
+  },
+  {
+    id: '7',
+    title: 'Database Systems',
+    description: 'Learn how to design, implement and manage database systems effectively.',
+    category: 'Technology',
+    level: 'Intermediate',
+    icon: Database,
+    modules: [
+      { title: 'Relational Database Concepts', completed: false },
+      { title: 'SQL Query Language', completed: false },
+      { title: 'NoSQL Databases', completed: false },
+      { title: 'Database Administration', completed: false },
+    ]
+  },
+  {
+    id: '8',
+    title: 'Artificial Intelligence',
+    description: 'Dive into the fascinating world of AI and machine learning algorithms.',
+    category: 'Technology',
+    level: 'Advanced',
+    icon: Binary,
+    modules: [
+      { title: 'Machine Learning Fundamentals', completed: false },
+      { title: 'Neural Networks', completed: false },
+      { title: 'Natural Language Processing', completed: false },
+      { title: 'Computer Vision', completed: false },
+    ]
+  },
+  {
+    id: '9',
+    title: 'Cloud Computing',
+    description: 'Master cloud platforms and learn to design scalable, resilient systems.',
+    category: 'Technology',
+    level: 'Advanced',
+    icon: Server,
+    modules: [
+      { title: 'Cloud Infrastructure', completed: false },
+      { title: 'Deployment Strategies', completed: false },
+      { title: 'Containerization & Orchestration', completed: false },
+      { title: 'Cloud Security', completed: false },
+    ]
+  },
+  {
+    id: '10',
+    title: 'Molecular Biology',
+    description: 'Explore the molecular basis of biological activity between biomolecules.',
+    category: 'Science',
+    level: 'Advanced',
+    icon: Microscope,
+    modules: [
+      { title: 'DNA and RNA Structure', completed: false },
+      { title: 'Protein Synthesis', completed: false },
+      { title: 'Gene Expression', completed: false },
+      { title: 'Genetic Engineering', completed: false },
+    ]
+  },
+  {
+    id: '11',
+    title: 'Quantum Physics',
+    description: 'Understand the peculiar world of quantum mechanics and its applications.',
+    category: 'Science',
+    level: 'Advanced',
+    icon: Atom,
+    modules: [
+      { title: 'Wave-Particle Duality', completed: false },
+      { title: 'Quantum States & Measurement', completed: false },
+      { title: 'Quantum Entanglement', completed: false },
+      { title: 'Quantum Computing', completed: false },
+    ]
+  },
+  {
+    id: '12',
+    title: 'Chemistry Fundamentals',
+    description: 'Learn the core principles of chemical reactions and molecular properties.',
+    category: 'Science',
+    level: 'Beginner',
+    icon: TestTube,
+    modules: [
+      { title: 'Atomic Structure', completed: false },
+      { title: 'Chemical Bonding', completed: false },
+      { title: 'Stoichiometry', completed: false },
+      { title: 'Acids, Bases & Solutions', completed: false },
+    ]
+  },
+  {
+    id: '13',
+    title: 'Calculus',
+    description: 'Master the mathematics of continuous change and its applications.',
+    category: 'Mathematics',
+    level: 'Intermediate',
+    icon: Calculator,
+    modules: [
+      { title: 'Limits and Continuity', completed: false },
+      { title: 'Differentiation', completed: false },
+      { title: 'Integration', completed: false },
+      { title: 'Multivariable Calculus', completed: false },
+    ]
+  },
+  {
+    id: '14',
+    title: 'Linear Algebra',
+    description: 'Study vector spaces, linear transformations, and matrices.',
+    category: 'Mathematics',
+    level: 'Intermediate',
+    icon: Calculator,
+    modules: [
+      { title: 'Vectors and Spaces', completed: false },
+      { title: 'Matrix Operations', completed: false },
+      { title: 'Eigenvalues and Eigenvectors', completed: false },
+      { title: 'Applications of Linear Algebra', completed: false },
+    ]
+  },
+  {
+    id: '15',
+    title: 'Discrete Mathematics',
+    description: 'Explore the mathematical structures that are fundamentally discrete.',
+    category: 'Mathematics',
+    level: 'Intermediate',
+    icon: Calculator,
+    modules: [
+      { title: 'Set Theory', completed: false },
+      { title: 'Number Theory', completed: false },
+      { title: 'Graph Theory', completed: false },
+      { title: 'Combinatorics', completed: false },
+    ]
+  },
+  {
+    id: '16',
+    title: 'Statistics and Probability',
+    description: 'Learn to analyze data and make predictions using statistical methods.',
+    category: 'Mathematics',
+    level: 'Beginner',
+    icon: BarChart2,
+    modules: [
+      { title: 'Descriptive Statistics', completed: false },
+      { title: 'Probability Theory', completed: false },
+      { title: 'Statistical Inference', completed: false },
+      { title: 'Regression Analysis', completed: false },
+    ]
+  },
 ];
 
-const categories = ['All', 'Technology', 'Science', 'Arts', 'Humanities'];
+const categories = ['All', 'Technology', 'Science', 'Mathematics', 'Arts', 'Humanities'];
 
 const LearningPaths = () => {
   const [activeCategory, setActiveCategory] = useState('All');
