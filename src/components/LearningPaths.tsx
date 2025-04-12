@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Book, Bookmark, Code, Flask, Lightbulb, MusicNote, Palette } from 'lucide-react';
+import { ArrowRight, Book, Bookmark, Code, Lightbulb, Music, Palette, Beaker } from 'lucide-react';
 
 interface LearningPath {
   id: string;
@@ -41,7 +41,7 @@ const learningPaths: LearningPath[] = [
     description: 'Understand the foundational principles of physics that govern our universe.',
     category: 'Science',
     level: 'Intermediate',
-    icon: Flask,
+    icon: Beaker,
     modules: [
       { title: 'Mechanics', completed: false },
       { title: 'Thermodynamics', completed: false },
@@ -55,7 +55,7 @@ const learningPaths: LearningPath[] = [
     description: 'Explore the rich traditions and techniques of Indian classical music.',
     category: 'Arts',
     level: 'Beginner',
-    icon: MusicNote,
+    icon: Music,
     modules: [
       { title: 'Introduction to Ragas', completed: false },
       { title: 'Taals and Rhythm', completed: false },
