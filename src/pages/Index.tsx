@@ -1,18 +1,25 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mic, MicOff, Send, ArrowDown } from 'lucide-react';
+import { Mic, MicOff, Send, ArrowDown, Moon, Sun } from 'lucide-react';
 import HayagrivaLogo from '@/components/HayagrivaLogo';
 import Chat from '@/components/Chat';
 import FeatureCard from '@/components/FeatureCard';
 import { features } from '@/data/features';
+import { useTheme } from '@/components/theme-provider';
+import { Switch } from '@/components/ui/switch';
 
 const Index = () => {
+  const { theme, setTheme } = useTheme();
+
   const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [showChat, setShowChat] = useState(false);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   const handleSend = () => {
     if (input.trim() === '') return;
@@ -57,6 +64,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+        <Sun className="h-5 w-5 text-muted-foreground" />
+        <Switch 
+          checked={theme === 'dark'}
+          onCheckedChange={toggleTheme}
+        />
+        <Moon className="h-5 w-5 text-muted-foreground" />
+      </div>
+
       {/* Hero Section */}
       <section className="relative h-screen flex flex-col items-center justify-center px-4 py-12 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background to-background/80 z-0"></div>
