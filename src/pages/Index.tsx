@@ -1,22 +1,32 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mic, MicOff, Send, ArrowDown, Moon, Sun } from 'lucide-react';
-import HayagrivaLogo from '@/components/HayagrivaLogo';
+import { 
+  Mic, 
+  MicOff, 
+  Send, 
+  ArrowDown 
+} from 'lucide-react';
+import HayagrivaLogoHorse from '@/components/HayagrivaLogoHorse';
 import Chat from '@/components/Chat';
 import FeatureCard from '@/components/FeatureCard';
 import { features } from '@/data/features';
 import { useTheme } from '@/components/theme-provider';
 import { Switch } from '@/components/ui/switch';
+import { Sun, Moon } from 'lucide-react';
+import VoiceAssistant from '@/components/VoiceAssistant';
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
 
   const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [showChat, setShowChat] = useState(false);
-
+  
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
@@ -34,19 +44,39 @@ const Index = () => {
     
     // Simulate AI response
     setTimeout(() => {
+      const aiResponse = "Namaste! I am Hayagriva, your AI assistant with an Indian accent. I'm here to help you with your questions and tasks. How can I assist you today?";
+      
       setMessages([
         ...newMessages,
-        { 
-          role: 'assistant', 
-          content: "Namaste! I am Hayagriva, your AI assistant with an Indian accent. I'm here to help you with your questions and tasks. While my voice capabilities are still under development, I can assist you with text-based conversations for now."
-        }
+        { role: 'assistant', content: aiResponse }
       ]);
+      
+      // Automatically trigger the voice assistant for AI responses
+      if (newMessages.length === 1) {
+        toast({
+          title: "Voice Assistant Activated",
+          description: "Hayagriva is now speaking. Click the speaker icon to control voice output."
+        });
+      }
     }, 1000);
   };
 
   const toggleListening = () => {
     setIsListening(!isListening);
-    // Voice functionality would be implemented in a future phase
+    
+    if (!isListening) {
+      toast({
+        title: "Voice Input Activated",
+        description: "Hayagriva is now listening. Speak clearly to send your message."
+      });
+      
+      // Simulate voice recognition after 3 seconds
+      setTimeout(() => {
+        const recognizedText = "What is the concept of dharma in Indian philosophy?";
+        setInput(recognizedText);
+        setIsListening(false);
+      }, 3000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -62,10 +92,13 @@ const Index = () => {
     }, 100);
   };
 
+  // Get the most recent AI message for voice output
+  const latestAIMessage = messages.filter(msg => msg.role === 'assistant').slice(-1)[0]?.content || "";
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Theme Toggle */}
-      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
         <Sun className="h-5 w-5 text-muted-foreground" />
         <Switch 
           checked={theme === 'dark'}
@@ -84,7 +117,7 @@ const Index = () => {
         
         <div className="z-10 text-center max-w-4xl">
           <div className="mb-8 animate-floating">
-            <HayagrivaLogo className="mx-auto w-32 h-32" />
+            <HayagrivaLogoHorse className="mx-auto w-32 h-32" />
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
@@ -146,6 +179,16 @@ const Index = () => {
           
           <div className="max-w-4xl mx-auto">
             <div className="bg-card shadow-lg rounded-2xl border border-border overflow-hidden">
+              <div className="p-3 border-b border-border flex justify-between items-center">
+                <div className="flex items-center">
+                  <HayagrivaLogoHorse className="w-6 h-6 mr-2" />
+                  <span className="font-medium">Hayagriva Assistant</span>
+                </div>
+                
+                {/* Voice Assistant component for the latest AI message */}
+                <VoiceAssistant text={latestAIMessage} />
+              </div>
+              
               <Chat messages={messages} />
               
               <div className="p-4 border-t border-border flex items-center gap-2">
