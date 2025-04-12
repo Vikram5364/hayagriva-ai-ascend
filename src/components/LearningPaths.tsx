@@ -21,7 +21,23 @@ import {
   Microscope,
   Atom,
   TestTube,
-  BarChart2
+  BarChart2,
+  Dna,
+  Network,
+  Layers,
+  Brain,
+  Smartphone,
+  Shield,
+  Chip,
+  Waves,
+  Orbit,
+  Map,
+  Mountain,
+  Droplets,
+  Scale,
+  BookOpen,
+  Compass,
+  Landmark
 } from 'lucide-react';
 
 interface LearningPath {
@@ -50,62 +66,6 @@ const learningPaths: LearningPath[] = [
       { title: 'Basic Algorithms', completed: false },
       { title: 'Data Structures', completed: false },
       { title: 'Object-Oriented Programming', completed: false },
-    ]
-  },
-  {
-    id: '2',
-    title: 'Classical Physics',
-    description: 'Understand the foundational principles of physics that govern our universe.',
-    category: 'Science',
-    level: 'Intermediate',
-    icon: Beaker,
-    modules: [
-      { title: 'Mechanics', completed: false },
-      { title: 'Thermodynamics', completed: false },
-      { title: 'Electricity & Magnetism', completed: false },
-      { title: 'Optics', completed: false },
-    ]
-  },
-  {
-    id: '3',
-    title: 'Indian Classical Music',
-    description: 'Explore the rich traditions and techniques of Indian classical music.',
-    category: 'Arts',
-    level: 'Beginner',
-    icon: Music,
-    modules: [
-      { title: 'Introduction to Ragas', completed: false },
-      { title: 'Taals and Rhythm', completed: false },
-      { title: 'Vocal Techniques', completed: false },
-      { title: 'Instrumental Traditions', completed: false },
-    ]
-  },
-  {
-    id: '4',
-    title: 'Indian Philosophy',
-    description: 'Discover the profound philosophical traditions of India.',
-    category: 'Humanities',
-    level: 'Advanced',
-    icon: Lightbulb,
-    modules: [
-      { title: 'Vedic Philosophy', completed: false },
-      { title: 'Buddhism and Jainism', completed: false },
-      { title: 'Advaita Vedanta', completed: false },
-      { title: 'Modern Indian Thought', completed: false },
-    ]
-  },
-  {
-    id: '5',
-    title: 'Digital Painting',
-    description: 'Learn the techniques and principles of digital art and illustration.',
-    category: 'Arts',
-    level: 'Intermediate',
-    icon: Palette,
-    modules: [
-      { title: 'Digital Tools Introduction', completed: false },
-      { title: 'Color Theory', completed: false },
-      { title: 'Composition', completed: false },
-      { title: 'Advanced Techniques', completed: false },
     ]
   },
   {
@@ -165,6 +125,90 @@ const learningPaths: LearningPath[] = [
     ]
   },
   {
+    id: '18',
+    title: 'Cybersecurity',
+    description: 'Learn to protect systems, networks, and programs from digital attacks.',
+    category: 'Technology',
+    level: 'Advanced',
+    icon: Shield,
+    modules: [
+      { title: 'Network Security', completed: false },
+      { title: 'Cryptography', completed: false },
+      { title: 'Ethical Hacking', completed: false },
+      { title: 'Security Governance', completed: false },
+    ]
+  },
+  {
+    id: '19',
+    title: 'Mobile App Development',
+    description: 'Create native and cross-platform mobile applications for iOS and Android.',
+    category: 'Technology',
+    level: 'Intermediate',
+    icon: Smartphone,
+    modules: [
+      { title: 'Mobile UI/UX Design', completed: false },
+      { title: 'Native Development', completed: false },
+      { title: 'Cross-platform Frameworks', completed: false },
+      { title: 'App Deployment & Analytics', completed: false },
+    ]
+  },
+  {
+    id: '20',
+    title: 'Blockchain Technology',
+    description: 'Understand distributed ledger technology and its applications.',
+    category: 'Technology',
+    level: 'Advanced',
+    icon: Network,
+    modules: [
+      { title: 'Blockchain Fundamentals', completed: false },
+      { title: 'Smart Contracts', completed: false },
+      { title: 'Decentralized Applications', completed: false },
+      { title: 'Cryptocurrency Systems', completed: false },
+    ]
+  },
+  {
+    id: '21',
+    title: 'DevOps Practices',
+    description: 'Bridge development and operations with automation and collaboration.',
+    category: 'Technology',
+    level: 'Intermediate',
+    icon: Layers,
+    modules: [
+      { title: 'Continuous Integration', completed: false },
+      { title: 'Continuous Deployment', completed: false },
+      { title: 'Infrastructure as Code', completed: false },
+      { title: 'Monitoring & Observability', completed: false },
+    ]
+  },
+  {
+    id: '22',
+    title: 'Embedded Systems',
+    description: 'Design and program computer systems embedded in other machines.',
+    category: 'Technology',
+    level: 'Intermediate',
+    icon: Chip,
+    modules: [
+      { title: 'Microcontroller Programming', completed: false },
+      { title: 'Real-time Operating Systems', completed: false },
+      { title: 'IoT Device Development', completed: false },
+      { title: 'Hardware Interfaces', completed: false },
+    ]
+  },
+  {
+    id: '2',
+    title: 'Classical Physics',
+    description: 'Understand the foundational principles of physics that govern our universe.',
+    category: 'Science',
+    level: 'Intermediate',
+    icon: Beaker,
+    modules: [
+      { title: 'Mechanics', completed: false },
+      { title: 'Thermodynamics', completed: false },
+      { title: 'Electricity & Magnetism', completed: false },
+      { title: 'Optics', completed: false },
+    ]
+  },
+  {
     id: '10',
     title: 'Molecular Biology',
     description: 'Explore the molecular basis of biological activity between biomolecules.',
@@ -204,6 +248,118 @@ const learningPaths: LearningPath[] = [
       { title: 'Chemical Bonding', completed: false },
       { title: 'Stoichiometry', completed: false },
       { title: 'Acids, Bases & Solutions', completed: false },
+    ]
+  },
+  {
+    id: '23',
+    title: 'Organic Chemistry',
+    description: 'Study the structure, properties, and reactions of organic compounds.',
+    category: 'Science',
+    level: 'Intermediate',
+    icon: Beaker,
+    modules: [
+      { title: 'Hydrocarbons', completed: false },
+      { title: 'Functional Groups', completed: false },
+      { title: 'Reaction Mechanisms', completed: false },
+      { title: 'Spectroscopy', completed: false },
+    ]
+  },
+  {
+    id: '24',
+    title: 'Genetics',
+    description: 'Explore heredity, variation, and the function of genes in living organisms.',
+    category: 'Science',
+    level: 'Intermediate',
+    icon: Dna,
+    modules: [
+      { title: 'Mendelian Genetics', completed: false },
+      { title: 'Population Genetics', completed: false },
+      { title: 'Genomics', completed: false },
+      { title: 'Epigenetics', completed: false },
+    ]
+  },
+  {
+    id: '25',
+    title: 'Neuroscience',
+    description: 'Study the structure and function of the nervous system and brain.',
+    category: 'Science',
+    level: 'Advanced',
+    icon: Brain,
+    modules: [
+      { title: 'Neuroanatomy', completed: false },
+      { title: 'Neurophysiology', completed: false },
+      { title: 'Cognitive Neuroscience', completed: false },
+      { title: 'Neuroimaging', completed: false },
+    ]
+  },
+  {
+    id: '26',
+    title: 'Astrophysics',
+    description: 'Understand the physics of celestial objects and the universe.',
+    category: 'Science',
+    level: 'Advanced',
+    icon: Orbit,
+    modules: [
+      { title: 'Stellar Evolution', completed: false },
+      { title: 'Galactic Structure', completed: false },
+      { title: 'Cosmology', completed: false },
+      { title: 'Black Holes & Neutron Stars', completed: false },
+    ]
+  },
+  {
+    id: '27',
+    title: 'Earth Sciences',
+    description: 'Study the Earth\'s physical structure, atmosphere, and environment.',
+    category: 'Science',
+    level: 'Intermediate',
+    icon: Globe,
+    modules: [
+      { title: 'Geology', completed: false },
+      { title: 'Meteorology', completed: false },
+      { title: 'Oceanography', completed: false },
+      { title: 'Climate Science', completed: false },
+    ]
+  },
+  {
+    id: '28',
+    title: 'Ecology',
+    description: 'Explore the relationships between organisms and their environment.',
+    category: 'Science',
+    level: 'Intermediate',
+    icon: Mountain,
+    modules: [
+      { title: 'Ecosystem Dynamics', completed: false },
+      { title: 'Population Ecology', completed: false },
+      { title: 'Conservation Biology', completed: false },
+      { title: 'Biodiversity', completed: false },
+    ]
+  },
+  {
+    id: '29',
+    title: 'Biochemistry',
+    description: 'Study the chemical processes and substances in living organisms.',
+    category: 'Science',
+    level: 'Advanced',
+    icon: Droplets,
+    modules: [
+      { title: 'Enzymology', completed: false },
+      { title: 'Metabolism', completed: false },
+      { title: 'Molecular Cell Biology', completed: false },
+      { title: 'Structural Biochemistry', completed: false },
+    ]
+  },
+  {
+    id: '30',
+    title: 'Biophysics',
+    description: 'Apply principles of physics to understand biological systems.',
+    category: 'Science',
+    level: 'Advanced',
+    icon: Waves,
+    modules: [
+      { title: 'Biomechanics', completed: false },
+      { title: 'Medical Physics', completed: false },
+      { title: 'Molecular Biophysics', completed: false },
+      { title: 'Biological Imaging', completed: false },
     ]
   },
   {
@@ -262,6 +418,174 @@ const learningPaths: LearningPath[] = [
       { title: 'Regression Analysis', completed: false },
     ]
   },
+  {
+    id: '31',
+    title: 'Differential Equations',
+    description: 'Study equations involving derivatives and their applications.',
+    category: 'Mathematics',
+    level: 'Advanced',
+    icon: Calculator,
+    modules: [
+      { title: 'First-Order Equations', completed: false },
+      { title: 'Second-Order Equations', completed: false },
+      { title: 'Systems of Differential Equations', completed: false },
+      { title: 'Partial Differential Equations', completed: false },
+    ]
+  },
+  {
+    id: '32',
+    title: 'Abstract Algebra',
+    description: 'Explore algebraic structures like groups, rings, and fields.',
+    category: 'Mathematics',
+    level: 'Advanced',
+    icon: Calculator,
+    modules: [
+      { title: 'Group Theory', completed: false },
+      { title: 'Ring Theory', completed: false },
+      { title: 'Field Theory', completed: false },
+      { title: 'Galois Theory', completed: false },
+    ]
+  },
+  {
+    id: '33',
+    title: 'Real Analysis',
+    description: 'Study the rigorous theory of calculus and mathematical analysis.',
+    category: 'Mathematics',
+    level: 'Advanced',
+    icon: Calculator,
+    modules: [
+      { title: 'Sequences and Series', completed: false },
+      { title: 'Continuity & Differentiability', completed: false },
+      { title: 'Measure Theory', completed: false },
+      { title: 'Lebesgue Integration', completed: false },
+    ]
+  },
+  {
+    id: '34',
+    title: 'Topology',
+    description: 'Investigate properties of space preserved under continuous deformations.',
+    category: 'Mathematics',
+    level: 'Advanced',
+    icon: Layers,
+    modules: [
+      { title: 'Point-Set Topology', completed: false },
+      { title: 'Algebraic Topology', completed: false },
+      { title: 'Differential Topology', completed: false },
+      { title: 'Manifold Theory', completed: false },
+    ]
+  },
+  {
+    id: '35',
+    title: 'Numerical Methods',
+    description: 'Learn computational techniques for solving mathematical problems.',
+    category: 'Mathematics',
+    level: 'Intermediate',
+    icon: Binary,
+    modules: [
+      { title: 'Root Finding', completed: false },
+      { title: 'Numerical Integration', completed: false },
+      { title: 'Differential Equation Methods', completed: false },
+      { title: 'Linear Systems', completed: false },
+    ]
+  },
+  {
+    id: '36',
+    title: 'Mathematical Logic',
+    description: 'Study the principles of valid reasoning and formal proof systems.',
+    category: 'Mathematics',
+    level: 'Advanced',
+    icon: Scale,
+    modules: [
+      { title: 'Propositional Logic', completed: false },
+      { title: 'Predicate Logic', completed: false },
+      { title: 'Model Theory', completed: false },
+      { title: 'Computability Theory', completed: false },
+    ]
+  },
+  {
+    id: '3',
+    title: 'Indian Classical Music',
+    description: 'Explore the rich traditions and techniques of Indian classical music.',
+    category: 'Arts',
+    level: 'Beginner',
+    icon: Music,
+    modules: [
+      { title: 'Introduction to Ragas', completed: false },
+      { title: 'Taals and Rhythm', completed: false },
+      { title: 'Vocal Techniques', completed: false },
+      { title: 'Instrumental Traditions', completed: false },
+    ]
+  },
+  {
+    id: '4',
+    title: 'Indian Philosophy',
+    description: 'Discover the profound philosophical traditions of India.',
+    category: 'Humanities',
+    level: 'Advanced',
+    icon: Lightbulb,
+    modules: [
+      { title: 'Vedic Philosophy', completed: false },
+      { title: 'Buddhism and Jainism', completed: false },
+      { title: 'Advaita Vedanta', completed: false },
+      { title: 'Modern Indian Thought', completed: false },
+    ]
+  },
+  {
+    id: '5',
+    title: 'Digital Painting',
+    description: 'Learn the techniques and principles of digital art and illustration.',
+    category: 'Arts',
+    level: 'Intermediate',
+    icon: Palette,
+    modules: [
+      { title: 'Digital Tools Introduction', completed: false },
+      { title: 'Color Theory', completed: false },
+      { title: 'Composition', completed: false },
+      { title: 'Advanced Techniques', completed: false },
+    ]
+  },
+  {
+    id: '37',
+    title: 'World Literature',
+    description: 'Explore great literary works from different cultures and time periods.',
+    category: 'Humanities',
+    level: 'Intermediate',
+    icon: BookOpen,
+    modules: [
+      { title: 'Ancient Literature', completed: false },
+      { title: 'Renaissance & Enlightenment', completed: false },
+      { title: 'Modernist Literature', completed: false },
+      { title: 'Postcolonial Literature', completed: false },
+    ]
+  },
+  {
+    id: '38',
+    title: 'World History',
+    description: 'Study major historical events and their impact on human civilization.',
+    category: 'Humanities',
+    level: 'Beginner',
+    icon: Landmark,
+    modules: [
+      { title: 'Ancient Civilizations', completed: false },
+      { title: 'Medieval Period', completed: false },
+      { title: 'Modern Era', completed: false },
+      { title: 'Contemporary History', completed: false },
+    ]
+  },
+  {
+    id: '39',
+    title: 'Ethical Systems',
+    description: 'Explore different frameworks for moral reasoning and decision-making.',
+    category: 'Humanities',
+    level: 'Intermediate',
+    icon: Compass,
+    modules: [
+      { title: 'Virtue Ethics', completed: false },
+      { title: 'Deontology', completed: false },
+      { title: 'Consequentialism', completed: false },
+      { title: 'Applied Ethics', completed: false },
+    ]
+  }
 ];
 
 const categories = ['All', 'Technology', 'Science', 'Mathematics', 'Arts', 'Humanities'];

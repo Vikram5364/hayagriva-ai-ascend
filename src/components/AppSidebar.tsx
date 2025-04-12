@@ -26,9 +26,10 @@ import {
   MessageSquare, 
   Mic, 
   Settings, 
-  User 
+  User, 
+  Code,
 } from 'lucide-react';
-import HayagrivaLogoHorse from './HayagrivaLogoHorse';
+import HayagrivaLogoHorseUpdate from './HayagrivaLogoHorseUpdate';
 import AuthForms from './AuthForms';
 
 // For demo purposes
@@ -50,7 +51,7 @@ const AppSidebar = () => {
           <DrawerContent className="h-[80vh]">
             <div className="p-4">
               <div className="flex items-center mb-6">
-                <HayagrivaLogoHorse className="w-8 h-8 mr-2" />
+                <HayagrivaLogoHorseUpdate className="w-8 h-8 mr-2" />
                 <h2 className="text-lg font-bold">Hayagriva AI</h2>
               </div>
               
@@ -61,6 +62,7 @@ const AppSidebar = () => {
                   <MobileSidebarItem icon={MessageSquare} label="Chat" href="#chat-section" />
                   <MobileSidebarItem icon={Book} label="Learning Paths" href="/learning" />
                   <MobileSidebarItem icon={FileText} label="Document Reader" href="/reader" />
+                  <MobileSidebarItem icon={Code} label="Code Generation" href="/code" />
                   <MobileSidebarItem icon={Mic} label="Voice Assistant" href="#" />
                   <MobileSidebarItem icon={Github} label="GitHub Integration" href="#" />
                   <MobileSidebarItem icon={Layers} label="Subject Explorer" href="#" />
@@ -101,7 +103,7 @@ const AppSidebar = () => {
       <Sidebar className="hidden md:flex">
         <SidebarHeader>
           <div className="flex items-center p-2">
-            <HayagrivaLogoHorse className="w-8 h-8 mr-2" />
+            <HayagrivaLogoHorseUpdate className="w-8 h-8 mr-2" />
             <h2 className="text-lg font-bold">Hayagriva AI</h2>
           </div>
         </SidebarHeader>
@@ -143,6 +145,15 @@ const AppSidebar = () => {
                     <a href="/reader">
                       <FileText className="h-4 w-4" />
                       <span>Document Reader</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Code Generation">
+                    <a href="/code">
+                      <Code className="h-4 w-4" />
+                      <span>Code Generation</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

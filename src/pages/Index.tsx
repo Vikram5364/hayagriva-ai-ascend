@@ -6,9 +6,10 @@ import {
   Mic, 
   MicOff, 
   Send, 
-  ArrowDown 
+  ArrowDown,
+  Beaker
 } from 'lucide-react';
-import HayagrivaLogoHorse from '@/components/HayagrivaLogoHorse';
+import HayagrivaLogoHorseUpdate from '@/components/HayagrivaLogoHorseUpdate';
 import Chat from '@/components/Chat';
 import FeatureCard from '@/components/FeatureCard';
 import { features } from '@/data/features';
@@ -16,16 +17,20 @@ import { useTheme } from '@/components/theme-provider';
 import { Switch } from '@/components/ui/switch';
 import { Sun, Moon } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
+  const [chemistryMessages, setChemistryMessages] = useState<{role: string, content: string}[]>([]);
   const [input, setInput] = useState("");
+  const [chemistryInput, setChemistryInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [speakResponse, setSpeakResponse] = useState(true);
+  const [activeTab, setActiveTab] = useState("general");
   
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -69,6 +74,14 @@ const Index = () => {
   };
 
   const handleSend = () => {
+    if (activeTab === "general") {
+      handleGeneralSend();
+    } else {
+      handleChemistrySend();
+    }
+  };
+
+  const handleGeneralSend = () => {
     if (input.trim() === '') return;
     
     const newMessages = [
@@ -101,6 +114,39 @@ const Index = () => {
     }, 1000);
   };
 
+  const handleChemistrySend = () => {
+    if (chemistryInput.trim() === '') return;
+    
+    const newMessages = [
+      ...chemistryMessages,
+      { role: 'user', content: chemistryInput },
+    ];
+    
+    setChemistryMessages(newMessages);
+    setChemistryInput("");
+    
+    // Simulate AI response for organic chemistry
+    setTimeout(() => {
+      let aiResponse = "This is the Organic Chemistry assistant. I can help you understand chemical structures, reactions, and mechanisms. What specific organic chemistry question do you have?";
+      
+      if (chemistryInput.toLowerCase().includes("alkane")) {
+        aiResponse = "Alkanes are saturated hydrocarbons with the general formula CnH2n+2. They contain only single bonds between carbon atoms and are relatively unreactive compared to other hydrocarbon groups.";
+      } else if (chemistryInput.toLowerCase().includes("benzene")) {
+        aiResponse = "Benzene (C6H6) is an aromatic hydrocarbon with a ring structure. It has unusual stability due to its resonance structure, with delocalized electrons in a π system above and below the plane of the ring.";
+      } else if (chemistryInput.toLowerCase().includes("functional group")) {
+        aiResponse = "Functional groups are specific groupings of atoms within molecules that are responsible for the characteristic chemical reactions of those molecules. Common examples include hydroxyl (-OH), carbonyl (C=O), and carboxyl (-COOH) groups.";
+      }
+      
+      setChemistryMessages([
+        ...newMessages,
+        { role: 'assistant', content: aiResponse }
+      ]);
+      
+      // Automatically speak the AI's response
+      speakText(aiResponse);
+    }, 1000);
+  };
+
   // Initialize speech synthesis
   useEffect(() => {
     const synth = window.speechSynthesis;
@@ -130,6 +176,14 @@ const Index = () => {
     }
   }, [messages]);
 
+  // Speak new chemistry AI messages when they arrive
+  useEffect(() => {
+    const latestMessage = chemistryMessages[chemistryMessages.length - 1];
+    if (latestMessage && latestMessage.role === 'assistant') {
+      speakText(latestMessage.content);
+    }
+  }, [chemistryMessages]);
+
   const toggleListening = () => {
     setIsListening(!isListening);
     
@@ -141,8 +195,15 @@ const Index = () => {
       
       // Simulate voice recognition after 3 seconds
       setTimeout(() => {
-        const recognizedText = "What is the concept of dharma in Indian philosophy?";
-        setInput(recognizedText);
+        const recognizedText = activeTab === "general" 
+          ? "What is the concept of dharma in Indian philosophy?" 
+          : "Explain the structure of benzene";
+          
+        if (activeTab === "general") {
+          setInput(recognizedText);
+        } else {
+          setChemistryInput(recognizedText);
+        }
         setIsListening(false);
       }, 3000);
     }
@@ -160,9 +221,6 @@ const Index = () => {
       document.getElementById('chat-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
-
-  // Get the most recent AI message for voice output
-  const latestAIMessage = messages.filter(msg => msg.role === 'assistant').slice(-1)[0]?.content || "";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -186,7 +244,7 @@ const Index = () => {
         
         <div className="z-10 text-center max-w-4xl">
           <div className="mb-8 animate-floating">
-            <HayagrivaLogoHorse className="mx-auto w-32 h-32" />
+            <HayagrivaLogoHorseUpdate className="mx-auto w-32 h-32" />
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
@@ -250,7 +308,7 @@ const Index = () => {
             <div className="bg-card shadow-lg rounded-2xl border border-border overflow-hidden">
               <div className="p-3 border-b border-border flex justify-between items-center">
                 <div className="flex items-center">
-                  <HayagrivaLogoHorse className="w-6 h-6 mr-2" />
+                  <HayagrivaLogoHorseUpdate className="w-6 h-6 mr-2" />
                   <span className="font-medium">Hayagriva Assistant</span>
                 </div>
                 
@@ -263,30 +321,71 @@ const Index = () => {
                 </div>
               </div>
               
-              <Chat messages={messages} />
-              
-              <div className="p-4 border-t border-border flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={isListening ? "text-destructive" : ""}
-                  onClick={toggleListening}
-                >
-                  {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-                </Button>
+              <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab}>
+                <div className="px-4 pt-3">
+                  <TabsList className="w-full grid grid-cols-2">
+                    <TabsTrigger value="general">General Assistant</TabsTrigger>
+                    <TabsTrigger value="chemistry">
+                      <Beaker className="h-4 w-4 mr-2" />
+                      Organic Chemistry
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
                 
-                <Input
-                  placeholder="Ask Hayagriva something..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="flex-1"
-                />
+                <TabsContent value="general">
+                  <Chat messages={messages} />
+                  
+                  <div className="p-4 border-t border-border flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={isListening ? "text-destructive" : ""}
+                      onClick={toggleListening}
+                    >
+                      {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                    </Button>
+                    
+                    <Input
+                      placeholder="Ask Hayagriva something..."
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="flex-1"
+                    />
+                    
+                    <Button onClick={handleGeneralSend} disabled={input.trim() === ''}>
+                      <Send className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </TabsContent>
                 
-                <Button onClick={handleSend} disabled={input.trim() === ''}>
-                  <Send className="h-5 w-5" />
-                </Button>
-              </div>
+                <TabsContent value="chemistry">
+                  <Chat messages={chemistryMessages} />
+                  
+                  <div className="p-4 border-t border-border flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={isListening ? "text-destructive" : ""}
+                      onClick={toggleListening}
+                    >
+                      {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                    </Button>
+                    
+                    <Input
+                      placeholder="Ask about organic chemistry..."
+                      value={chemistryInput}
+                      onChange={(e) => setChemistryInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="flex-1"
+                    />
+                    
+                    <Button onClick={handleChemistrySend} disabled={chemistryInput.trim() === ''}>
+                      <Send className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </div>

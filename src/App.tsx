@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LearningPathsPage from "./pages/LearningPathsPage";
 import DocumentReaderPage from "./pages/DocumentReaderPage";
+import CodeGenerationPage from "./pages/CodeGenerationPage";
 import AppSidebar from "./components/AppSidebar";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/learning" element={<LearningPathsPage />} />
                     <Route path="/reader" element={<DocumentReaderPage />} />
+                    <Route path="/code" element={<CodeGenerationPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </div>
