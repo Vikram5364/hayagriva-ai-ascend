@@ -2,8 +2,8 @@
 import React from 'react';
 import LearningPaths from '@/components/LearningPaths';
 
-const LearningPathsPage = () => {
+const AIChatbotPage = () => {
   return <LearningPaths />;
 };
 
-export default LearningPathsPage;
+export default AIChatbotPage;

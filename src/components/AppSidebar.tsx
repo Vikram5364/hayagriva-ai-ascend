@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Sidebar,
@@ -28,6 +27,7 @@ import {
   Settings, 
   User, 
   Code,
+  Bot,
 } from 'lucide-react';
 import HayagrivaLogoHorseUpdate from './HayagrivaLogoHorseUpdate';
 import AuthForms from './AuthForms';
@@ -60,10 +60,9 @@ const AppSidebar = () => {
                 <div className="space-y-2">
                   <MobileSidebarItem icon={Home} label="Home" href="/" />
                   <MobileSidebarItem icon={MessageSquare} label="Chat" href="#chat-section" />
-                  <MobileSidebarItem icon={Book} label="Learning Paths" href="/learning" />
+                  <MobileSidebarItem icon={Bot} label="AI Chatbots" href="/chatbot" />
                   <MobileSidebarItem icon={FileText} label="Document Reader" href="/reader" />
                   <MobileSidebarItem icon={Code} label="Code Generation" href="/code" />
-                  <MobileSidebarItem icon={Mic} label="Voice Assistant" href="#" />
                   <MobileSidebarItem icon={Github} label="GitHub Integration" href="#" />
                   <MobileSidebarItem icon={Layers} label="Subject Explorer" href="#" />
                 </div>
@@ -132,10 +131,10 @@ const AppSidebar = () => {
                 </SidebarMenuItem>
                 
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Learning Paths">
-                    <a href="/learning">
-                      <Book className="h-4 w-4" />
-                      <span>Learning Paths</span>
+                  <SidebarMenuButton asChild tooltip="AI Chatbots">
+                    <a href="/chatbot">
+                      <Bot className="h-4 w-4" />
+                      <span>AI Chatbots</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -165,15 +164,6 @@ const AppSidebar = () => {
             <SidebarGroupLabel>Tools</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Voice Assistant">
-                    <a href="#">
-                      <Mic className="h-4 w-4" />
-                      <span>Voice Assistant</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="GitHub Integration">
                     <a href="#">

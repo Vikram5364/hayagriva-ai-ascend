@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   ArrowRight, 
   Book, 
@@ -28,7 +30,7 @@ import {
   Brain,
   Smartphone,
   Shield,
-  Chip,
+  CircuitBoard,
   Waves,
   Orbit,
   Map,
@@ -37,7 +39,9 @@ import {
   Scale,
   BookOpen,
   Compass,
-  Landmark
+  Landmark,
+  PlusCircle,
+  Bot
 } from 'lucide-react';
 
 interface LearningPath {
@@ -186,7 +190,7 @@ const learningPaths: LearningPath[] = [
     description: 'Design and program computer systems embedded in other machines.',
     category: 'Technology',
     level: 'Intermediate',
-    icon: Chip,
+    icon: CircuitBoard,
     modules: [
       { title: 'Microcontroller Programming', completed: false },
       { title: 'Real-time Operating Systems', completed: false },
@@ -593,10 +597,26 @@ const categories = ['All', 'Technology', 'Science', 'Mathematics', 'Arts', 'Huma
 const LearningPaths = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [bookmarkedPaths, setBookmarkedPaths] = useState<string[]>([]);
+  const [showNewChatbotForm, setShowNewChatbotForm] = useState(false);
+  const [customPaths, setCustomPaths] = useState<LearningPath[]>([]);
+  
+  const [newChatbot, setNewChatbot] = useState({
+    title: '',
+    description: '',
+    category: 'Technology',
+    level: 'Beginner',
+    module1: '',
+    module2: '',
+    module3: '',
+    module4: '',
+  });
+  
+  // Combine predefined paths with custom user-created ones
+  const allPaths = [...learningPaths, ...customPaths];
   
   const filteredPaths = activeCategory === 'All' 
-    ? learningPaths 
-    : learningPaths.filter(path => path.category === activeCategory);
+    ? allPaths 
+    : allPaths.filter(path => path.category === activeCategory);
   
   const toggleBookmark = (id: string) => {
     setBookmarkedPaths(prev => 
@@ -604,16 +624,146 @@ const LearningPaths = () => {
     );
   };
   
+  const handleAddNewChatbot = () => {
+    if (newChatbot.title && newChatbot.description) {
+      const newPath: LearningPath = {
+        id: `custom-${Date.now()}`,
+        title: newChatbot.title,
+        description: newChatbot.description,
+        category: newChatbot.category,
+        level: newChatbot.level,
+        icon: Bot,
+        modules: [
+          { title: newChatbot.module1 || 'Module 1', completed: false },
+          { title: newChatbot.module2 || 'Module 2', completed: false },
+          { title: newChatbot.module3 || 'Module 3', completed: false },
+          { title: newChatbot.module4 || 'Module 4', completed: false },
+        ]
+      };
+      
+      setCustomPaths([...customPaths, newPath]);
+      setNewChatbot({
+        title: '',
+        description: '',
+        category: 'Technology',
+        level: 'Beginner',
+        module1: '',
+        module2: '',
+        module3: '',
+        module4: '',
+      });
+      setShowNewChatbotForm(false);
+    }
+  };
+  
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold gradient-text">Learning Paths</h2>
+        <h2 className="text-2xl font-bold gradient-text">AI Chatbots</h2>
+        <Button 
+          onClick={() => setShowNewChatbotForm(!showNewChatbotForm)} 
+          className="flex items-center gap-2"
+        >
+          <PlusCircle className="h-4 w-4" />
+          Add New Chatbot
+        </Button>
       </div>
+      
+      {showNewChatbotForm && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Create New AI Chatbot</CardTitle>
+            <CardDescription>Define your custom learning track AI chatbot</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Title</label>
+                <Input 
+                  value={newChatbot.title}
+                  onChange={(e) => setNewChatbot({...newChatbot, title: e.target.value})}
+                  placeholder="Organic Chemistry Assistant"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Category</label>
+                <select 
+                  value={newChatbot.category}
+                  onChange={(e) => setNewChatbot({...newChatbot, category: e.target.value})}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  {categories.filter(c => c !== 'All').map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Level</label>
+                <select 
+                  value={newChatbot.level}
+                  onChange={(e) => setNewChatbot({...newChatbot, level: e.target.value})}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-1 block">Description</label>
+              <Textarea 
+                value={newChatbot.description}
+                onChange={(e) => setNewChatbot({...newChatbot, description: e.target.value})}
+                placeholder="Describe what this AI chatbot will help with..."
+                className="min-h-[80px]"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-1 block">Learning Modules (optional)</label>
+              <div className="space-y-2">
+                <Input 
+                  value={newChatbot.module1}
+                  onChange={(e) => setNewChatbot({...newChatbot, module1: e.target.value})}
+                  placeholder="Module 1 (e.g., Basic Concepts)"
+                  className="mb-2"
+                />
+                <Input 
+                  value={newChatbot.module2}
+                  onChange={(e) => setNewChatbot({...newChatbot, module2: e.target.value})}
+                  placeholder="Module 2 (e.g., Advanced Topics)"
+                  className="mb-2"
+                />
+                <Input 
+                  value={newChatbot.module3}
+                  onChange={(e) => setNewChatbot({...newChatbot, module3: e.target.value})}
+                  placeholder="Module 3 (e.g., Practical Applications)"
+                  className="mb-2"
+                />
+                <Input 
+                  value={newChatbot.module4}
+                  onChange={(e) => setNewChatbot({...newChatbot, module4: e.target.value})}
+                  placeholder="Module 4 (e.g., Case Studies)"
+                />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline" onClick={() => setShowNewChatbotForm(false)}>Cancel</Button>
+            <Button onClick={handleAddNewChatbot}>Create Chatbot</Button>
+          </CardFooter>
+        </Card>
+      )}
       
       <Tabs defaultValue="browse" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="browse">Browse Paths</TabsTrigger>
-          <TabsTrigger value="my-paths">My Paths</TabsTrigger>
+          <TabsTrigger value="browse">Browse Chatbots</TabsTrigger>
+          <TabsTrigger value="my-paths">My Chatbots</TabsTrigger>
         </TabsList>
         
         <TabsContent value="browse">
@@ -671,7 +821,7 @@ const LearningPaths = () => {
                 </CardContent>
                 <CardFooter>
                   <Button className="w-full" size="sm">
-                    Start Learning <ArrowRight className="ml-2 h-4 w-4" />
+                    Start Chatting <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardFooter>
               </Card>
@@ -682,7 +832,7 @@ const LearningPaths = () => {
         <TabsContent value="my-paths">
           {bookmarkedPaths.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {learningPaths
+              {allPaths
                 .filter(path => bookmarkedPaths.includes(path.id))
                 .map(path => (
                   <Card key={path.id}>
@@ -715,9 +865,9 @@ const LearningPaths = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-              <Book className="h-16 w-16 mb-4" />
-              <p>No learning paths bookmarked yet.</p>
-              <p className="text-sm">Browse and bookmark paths to start learning.</p>
+              <Bot className="h-16 w-16 mb-4" />
+              <p>No AI chatbots bookmarked yet.</p>
+              <p className="text-sm">Browse and bookmark chatbots to start learning.</p>
             </div>
           )}
         </TabsContent>

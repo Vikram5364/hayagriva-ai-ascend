@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import LearningPathsPage from "./pages/LearningPathsPage";
+import AIChatbotPage from "./pages/LearningPathsPage";
 import DocumentReaderPage from "./pages/DocumentReaderPage";
 import CodeGenerationPage from "./pages/CodeGenerationPage";
 import AppSidebar from "./components/AppSidebar";
@@ -33,7 +33,7 @@ const App = () => (
                   </div>
                   <Routes>
                     <Route path="/" element={<Index />} />
-                    <Route path="/learning" element={<LearningPathsPage />} />
+                    <Route path="/chatbot" element={<AIChatbotPage />} />
                     <Route path="/reader" element={<DocumentReaderPage />} />
                     <Route path="/code" element={<CodeGenerationPage />} />
                     <Route path="*" element={<NotFound />} />
