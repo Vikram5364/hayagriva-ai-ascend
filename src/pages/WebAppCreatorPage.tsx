@@ -1,13 +1,15 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Code, Download, FileCode, Copy, Eye, FileEdit, Play } from 'lucide-react';
+import { Code, Download, FileCode, Copy, Eye, FileEdit, Play, Send, MessageSquare, Bot } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 const WebAppCreatorPage = () => {
   const [prompt, setPrompt] = useState('');
@@ -16,30 +18,87 @@ const WebAppCreatorPage = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [showPreview, setShowPreview] = useState(false);
   const [technology, setTechnology] = useState('react');
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<{role: string, content: string}[]>([
+    {role: 'assistant', content: 'Hello! I\'m your web app creation assistant. How can I help you build your application today?'}
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Available technologies
+  const technologies = [
+    { value: 'vanilla', label: 'HTML/CSS/JavaScript' },
+    { value: 'react', label: 'React' },
+    { value: 'vue', label: 'Vue' },
+    { value: 'angular', label: 'Angular' },
+    { value: 'svelte', label: 'Svelte' },
+    { value: 'nextjs', label: 'Next.js' },
+    { value: 'gatsby', label: 'Gatsby' },
+    { value: 'tailwind', label: 'Tailwind CSS' },
+  ];
 
   // Generate preview HTML
   useEffect(() => {
     if (showPreview && Object.keys(generatedCode).length > 0) {
       const previewDoc = generatePreviewDocument();
       if (previewIframeRef.current) {
-        const iframeDoc = previewIframeRef.current.contentDocument || 
-                          previewIframeRef.current.contentWindow?.document;
-        if (iframeDoc) {
-          iframeDoc.open();
-          iframeDoc.write(previewDoc);
-          iframeDoc.close();
+        try {
+          const iframeDoc = previewIframeRef.current.contentDocument || 
+                            previewIframeRef.current.contentWindow?.document;
+          if (iframeDoc) {
+            iframeDoc.open();
+            iframeDoc.write(previewDoc);
+            iframeDoc.close();
+          }
+        } catch (error) {
+          console.error("Error updating preview:", error);
+          toast({
+            title: "Preview error",
+            description: "There was an issue displaying the preview. Try a different browser or check console for details.",
+            variant: "destructive"
+          });
         }
       }
     }
   }, [showPreview, generatedCode, activeTab]);
+
+  // Scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   const generatePreviewDocument = () => {
     // Create a complete HTML document for preview
     const htmlContent = generatedCode['index.html'] || '';
     const cssContent = generatedCode['styles.css'] || '';
     const jsContent = generatedCode['app.js'] || generatedCode['script.js'] || '';
+    
+    let techImports = '';
+    
+    switch (technology) {
+      case 'react':
+        techImports = '<script src="https://unpkg.com/react@17/umd/react.development.js"></script><script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>';
+        break;
+      case 'vue':
+        techImports = '<script src="https://unpkg.com/vue@next"></script>';
+        break;
+      case 'angular':
+        techImports = '<script src="https://unpkg.com/@angular/core@12"></script><script src="https://unpkg.com/@angular/common@12"></script><script src="https://unpkg.com/@angular/platform-browser@12"></script><script src="https://unpkg.com/@angular/platform-browser-dynamic@12"></script><script src="https://unpkg.com/zone.js"></script>';
+        break;
+      case 'svelte':
+        techImports = '<script src="https://unpkg.com/svelte/compiler.js"></script>';
+        break;
+      case 'tailwind':
+        techImports = '<script src="https://unpkg.com/tailwindcss@2/dist/tailwind.min.css"></script>';
+        break;
+      default:
+        techImports = '';
+    }
     
     return `
       <!DOCTYPE html>
@@ -48,8 +107,7 @@ const WebAppCreatorPage = () => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>${cssContent}</style>
-        ${technology === 'react' ? '<script src="https://unpkg.com/react@17/umd/react.development.js"></script><script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>' : ''}
-        ${technology === 'vue' ? '<script src="https://unpkg.com/vue@next"></script>' : ''}
+        ${techImports}
       </head>
       <body>
         ${htmlContent}
@@ -76,12 +134,30 @@ const WebAppCreatorPage = () => {
       let generatedFiles = {};
       
       // Generate different code based on selected technology
-      if (technology === 'react') {
-        generatedFiles = generateReactCode(prompt);
-      } else if (technology === 'vue') {
-        generatedFiles = generateVueCode(prompt);
-      } else {
-        generatedFiles = generateVanillaCode(prompt);
+      switch (technology) {
+        case 'react':
+          generatedFiles = generateReactCode(prompt);
+          break;
+        case 'vue':
+          generatedFiles = generateVueCode(prompt);
+          break;
+        case 'angular':
+          generatedFiles = generateAngularCode(prompt);
+          break;
+        case 'svelte':
+          generatedFiles = generateSvelteCode(prompt);
+          break;
+        case 'nextjs':
+          generatedFiles = generateNextJSCode(prompt);
+          break;
+        case 'gatsby':
+          generatedFiles = generateGatsbyCode(prompt);
+          break;
+        case 'tailwind':
+          generatedFiles = generateTailwindCode(prompt);
+          break;
+        default:
+          generatedFiles = generateVanillaCode(prompt);
       }
 
       setGeneratedCode(generatedFiles);
@@ -93,6 +169,45 @@ const WebAppCreatorPage = () => {
         description: "Your web app code has been created successfully."
       });
     }, 2000);
+  };
+
+  // Handle chat submission
+  const handleChatSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    
+    if (chatInput.trim() === '') return;
+    
+    // Add user message
+    const updatedMessages = [
+      ...chatMessages,
+      { role: 'user', content: chatInput }
+    ];
+    
+    setChatMessages(updatedMessages);
+    setChatInput('');
+    setIsChatLoading(true);
+    
+    // Simulate AI response (in a real app, this would call an API)
+    setTimeout(() => {
+      // Generate AI response based on user's query
+      let response = '';
+      
+      if (chatInput.toLowerCase().includes('react') || chatInput.toLowerCase().includes('jsx')) {
+        response = "React is a popular JavaScript library for building user interfaces. To create a React app, you'll need to set up a project with components, props, and state management. Would you like me to help you create a specific React component or explain React concepts?";
+      } else if (chatInput.toLowerCase().includes('css') || chatInput.toLowerCase().includes('style')) {
+        response = "CSS is used to style web pages. You can use vanilla CSS, preprocessors like SASS, or utility frameworks like Tailwind CSS. What specific styling aspects are you interested in?";
+      } else if (chatInput.toLowerCase().includes('database') || chatInput.toLowerCase().includes('backend')) {
+        response = "For backend functionality, you might want to consider technologies like Node.js, Express, Firebase, or Supabase. What kind of data persistence are you looking to implement?";
+      } else {
+        response = `I'd be happy to help you with your '${chatInput}' request. To get started, could you provide more specific details about what you're trying to build? For example, what functionality do you need, and which technologies are you most comfortable with?`;
+      }
+      
+      setChatMessages([
+        ...updatedMessages,
+        { role: 'assistant', content: response }
+      ]);
+      setIsChatLoading(false);
+    }, 1000);
   };
 
   // Generate code for different technologies
@@ -895,218 +1010,12 @@ app.mount('#app');`
     };
   };
 
-  const handleCopyCode = (code: string, filename: string) => {
-    navigator.clipboard.writeText(code);
-    toast({
-      title: "Copied to clipboard",
-      description: `${filename} code copied successfully.`
-    });
-  };
-
-  const handleUpdateCode = (newCode: string) => {
-    if (activeTab !== 'description' && activeTab !== 'preview') {
-      setGeneratedCode({
-        ...generatedCode,
-        [activeTab]: newCode
-      });
-
-      // If in preview mode, update the preview
-      if (showPreview) {
-        const previewDoc = generatePreviewDocument();
-        if (previewIframeRef.current) {
-          const iframeDoc = previewIframeRef.current.contentDocument || 
-                            previewIframeRef.current.contentWindow?.document;
-          if (iframeDoc) {
-            iframeDoc.open();
-            iframeDoc.write(previewDoc);
-            iframeDoc.close();
-          }
-        }
-      }
-    }
-  };
-
-  const handleDownloadAll = () => {
-    // Create a zip file (in a real implementation)
-    // For now, just show a toast
-    toast({
-      title: "Download initiated",
-      description: "In a production environment, this would download a zip with all files."
-    });
-  };
-
-  const fileTabItems = Object.keys(generatedCode).map(filename => (
-    <TabsTrigger key={filename} value={filename}>
-      {filename}
-    </TabsTrigger>
-  ));
-
-  return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-4">Web App Creator</h1>
-          <p className="text-muted-foreground mb-6">
-            Describe the web application you want to create, and our AI will generate the code for you.
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Describe Your Web App</CardTitle>
-            <CardDescription>
-              Provide details about the functionality, design, and purpose of your web application.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Select Technology</label>
-                <Select value={technology} onValueChange={setTechnology}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a technology" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="vanilla">HTML/CSS/JavaScript</SelectItem>
-                    <SelectItem value="react">React</SelectItem>
-                    <SelectItem value="vue">Vue</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <Textarea
-                placeholder="E.g., I want a responsive landing page for a fitness app with a hero section, features section, and contact form..."
-                className="h-32 mb-4"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-              />
-              <div className="flex justify-end">
-                <Button 
-                  onClick={handleGenerate} 
-                  disabled={isGenerating}
-                  className="flex gap-2"
-                >
-                  <Code className="h-4 w-4" />
-                  {isGenerating ? "Generating..." : "Generate Code"}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {Object.keys(generatedCode).length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Generated Code</span>
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={showPreview ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => setShowPreview(!showPreview)}
-                  >
-                    <Eye className="h-3 w-3 mr-1" /> Preview
-                  </Badge>
-                </div>
-              </CardTitle>
-              <CardDescription>
-                Review, edit, and download the code for your web application.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="mb-4">
-                  <TabsTrigger value="description">Description</TabsTrigger>
-                  {fileTabItems}
-                  {showPreview && <TabsTrigger value="preview">Live Preview</TabsTrigger>}
-                </TabsList>
-                <TabsContent value="description">
-                  <div className="bg-muted p-4 rounded-md">
-                    <h3 className="text-lg font-medium mb-2">Web App Details</h3>
-                    <p>This is a web application generated based on your description:</p>
-                    <p className="mt-2 italic">"{prompt}"</p>
-                    <div className="mt-4">
-                      <h4 className="font-medium">Technology: {technology === 'vanilla' ? 'HTML/CSS/JavaScript' : technology === 'react' ? 'React' : 'Vue'}</h4>
-                      <h4 className="font-medium mt-2">Files Generated:</h4>
-                      <ul className="list-disc list-inside mt-2">
-                        {Object.keys(generatedCode).map(filename => (
-                          <li key={filename}>{filename}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                {Object.entries(generatedCode).map(([filename, code]) => (
-                  <TabsContent key={filename} value={filename}>
-                    <div className="relative">
-                      <div className="absolute top-2 right-2 z-10 flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleCopyCode(code, filename)}
-                        >
-                          <Copy className="h-4 w-4 mr-1" /> Copy
-                        </Button>
-                        {showPreview && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setShowPreview(false)}
-                          >
-                            <FileEdit className="h-4 w-4 mr-1" /> Edit
-                          </Button>
-                        )}
-                      </div>
-                      <Textarea
-                        className="min-h-[400px] font-mono text-sm"
-                        value={code}
-                        onChange={(e) => handleUpdateCode(e.target.value)}
-                      />
-                    </div>
-                  </TabsContent>
-                ))}
-                
-                {showPreview && (
-                  <TabsContent value="preview" className="h-[500px]">
-                    <div className="bg-muted rounded-md h-full relative overflow-hidden">
-                      <div className="absolute top-2 right-2 z-10">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setShowPreview(false)}
-                        >
-                          <FileEdit className="h-4 w-4 mr-1" /> Edit Code
-                        </Button>
-                      </div>
-                      <iframe 
-                        ref={previewIframeRef}
-                        className="w-full h-full border-0" 
-                        title="Web App Preview"
-                      />
-                    </div>
-                  </TabsContent>
-                )}
-              </Tabs>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={() => setActiveTab('description')}>
-                View Details
-              </Button>
-              <Button 
-                onClick={handleDownloadAll} 
-                variant="outline"
-                className="flex gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download All Files
-              </Button>
-            </CardFooter>
-          </Card>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default WebAppCreatorPage;
+  // New code generation functions for additional technologies
+  const generateAngularCode = (promptText: string) => {
+    return {
+      'index.html': `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Angular App</title>
