@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLocation } from 'react-router-dom';
 import { 
   Mic, 
   MicOff, 
   Send, 
-  ArrowDown,
-  Beaker
+  ArrowDown
 } from 'lucide-react';
 import HayagrivaLogoHorseUpdate from '@/components/HayagrivaLogoHorseUpdate';
 import Chat from '@/components/Chat';
@@ -22,16 +22,49 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const Index = () => {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const location = useLocation();
 
   const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
-  const [chemistryMessages, setChemistryMessages] = useState<{role: string, content: string}[]>([]);
   const [input, setInput] = useState("");
-  const [chemistryInput, setChemistryInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [speakResponse, setSpeakResponse] = useState(true);
-  const [activeTab, setActiveTab] = useState("general");
   
+  // Parse the URL parameters to check if we should show a specific chatbot
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const chatbotParam = params.get('chatbot');
+    
+    if (chatbotParam) {
+      setShowChat(true);
+      // Scroll to chat section after a small delay to ensure elements are rendered
+      setTimeout(() => {
+        document.getElementById('chat-section')?.scrollIntoView({ behavior: 'smooth' });
+        
+        // Add an initial message based on the chatbot
+        const initialMessage = {
+          role: 'user',
+          content: `I'd like to learn about ${chatbotParam}`
+        };
+        
+        setMessages([initialMessage]);
+        
+        // Simulate AI response
+        setTimeout(() => {
+          let aiResponse = `I'd be happy to teach you about ${chatbotParam}. What specific aspects would you like to explore?`;
+          
+          setMessages([
+            initialMessage,
+            { role: 'assistant', content: aiResponse }
+          ]);
+          
+          // Automatically speak the AI's response
+          speakText(aiResponse);
+        }, 1000);
+      }, 100);
+    }
+  }, [location.search]);
+
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
@@ -74,11 +107,7 @@ const Index = () => {
   };
 
   const handleSend = () => {
-    if (activeTab === "general") {
-      handleGeneralSend();
-    } else {
-      handleChemistrySend();
-    }
+    handleGeneralSend();
   };
 
   const handleGeneralSend = () => {
@@ -114,39 +143,6 @@ const Index = () => {
     }, 1000);
   };
 
-  const handleChemistrySend = () => {
-    if (chemistryInput.trim() === '') return;
-    
-    const newMessages = [
-      ...chemistryMessages,
-      { role: 'user', content: chemistryInput },
-    ];
-    
-    setChemistryMessages(newMessages);
-    setChemistryInput("");
-    
-    // Simulate AI response for organic chemistry
-    setTimeout(() => {
-      let aiResponse = "This is the Organic Chemistry assistant. I can help you understand chemical structures, reactions, and mechanisms. What specific organic chemistry question do you have?";
-      
-      if (chemistryInput.toLowerCase().includes("alkane")) {
-        aiResponse = "Alkanes are saturated hydrocarbons with the general formula CnH2n+2. They contain only single bonds between carbon atoms and are relatively unreactive compared to other hydrocarbon groups.";
-      } else if (chemistryInput.toLowerCase().includes("benzene")) {
-        aiResponse = "Benzene (C6H6) is an aromatic hydrocarbon with a ring structure. It has unusual stability due to its resonance structure, with delocalized electrons in a π system above and below the plane of the ring.";
-      } else if (chemistryInput.toLowerCase().includes("functional group")) {
-        aiResponse = "Functional groups are specific groupings of atoms within molecules that are responsible for the characteristic chemical reactions of those molecules. Common examples include hydroxyl (-OH), carbonyl (C=O), and carboxyl (-COOH) groups.";
-      }
-      
-      setChemistryMessages([
-        ...newMessages,
-        { role: 'assistant', content: aiResponse }
-      ]);
-      
-      // Automatically speak the AI's response
-      speakText(aiResponse);
-    }, 1000);
-  };
-
   // Initialize speech synthesis
   useEffect(() => {
     const synth = window.speechSynthesis;
@@ -176,14 +172,6 @@ const Index = () => {
     }
   }, [messages]);
 
-  // Speak new chemistry AI messages when they arrive
-  useEffect(() => {
-    const latestMessage = chemistryMessages[chemistryMessages.length - 1];
-    if (latestMessage && latestMessage.role === 'assistant') {
-      speakText(latestMessage.content);
-    }
-  }, [chemistryMessages]);
-
   const toggleListening = () => {
     setIsListening(!isListening);
     
@@ -195,15 +183,9 @@ const Index = () => {
       
       // Simulate voice recognition after 3 seconds
       setTimeout(() => {
-        const recognizedText = activeTab === "general" 
-          ? "What is the concept of dharma in Indian philosophy?" 
-          : "Explain the structure of benzene";
+        const recognizedText = "What is the concept of dharma in Indian philosophy?";
           
-        if (activeTab === "general") {
-          setInput(recognizedText);
-        } else {
-          setChemistryInput(recognizedText);
-        }
+        setInput(recognizedText);
         setIsListening(false);
       }, 3000);
     }
@@ -321,71 +303,30 @@ const Index = () => {
                 </div>
               </div>
               
-              <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab}>
-                <div className="px-4 pt-3">
-                  <TabsList className="w-full grid grid-cols-2">
-                    <TabsTrigger value="general">General Assistant</TabsTrigger>
-                    <TabsTrigger value="chemistry">
-                      <Beaker className="h-4 w-4 mr-2" />
-                      Organic Chemistry
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
+              <Chat messages={messages} />
+              
+              <div className="p-4 border-t border-border flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={isListening ? "text-destructive" : ""}
+                  onClick={toggleListening}
+                >
+                  {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                </Button>
                 
-                <TabsContent value="general">
-                  <Chat messages={messages} />
-                  
-                  <div className="p-4 border-t border-border flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={isListening ? "text-destructive" : ""}
-                      onClick={toggleListening}
-                    >
-                      {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-                    </Button>
-                    
-                    <Input
-                      placeholder="Ask Hayagriva something..."
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="flex-1"
-                    />
-                    
-                    <Button onClick={handleGeneralSend} disabled={input.trim() === ''}>
-                      <Send className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </TabsContent>
+                <Input
+                  placeholder="Ask Hayagriva something..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="flex-1"
+                />
                 
-                <TabsContent value="chemistry">
-                  <Chat messages={chemistryMessages} />
-                  
-                  <div className="p-4 border-t border-border flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={isListening ? "text-destructive" : ""}
-                      onClick={toggleListening}
-                    >
-                      {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-                    </Button>
-                    
-                    <Input
-                      placeholder="Ask about organic chemistry..."
-                      value={chemistryInput}
-                      onChange={(e) => setChemistryInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="flex-1"
-                    />
-                    
-                    <Button onClick={handleChemistrySend} disabled={chemistryInput.trim() === ''}>
-                      <Send className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </TabsContent>
-              </Tabs>
+                <Button onClick={handleSend} disabled={input.trim() === ''}>
+                  <Send className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>

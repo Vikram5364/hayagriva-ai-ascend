@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
   Book, 
@@ -595,6 +597,7 @@ const learningPaths: LearningPath[] = [
 const categories = ['All', 'Technology', 'Science', 'Mathematics', 'Arts', 'Humanities'];
 
 const LearningPaths = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('All');
   const [bookmarkedPaths, setBookmarkedPaths] = useState<string[]>([]);
   const [showNewChatbotForm, setShowNewChatbotForm] = useState(false);
@@ -622,6 +625,11 @@ const LearningPaths = () => {
     setBookmarkedPaths(prev => 
       prev.includes(id) ? prev.filter(pathId => pathId !== id) : [...prev, id]
     );
+  };
+
+  const handleStartChatting = (path: LearningPath) => {
+    // Navigate to the home page with a query parameter to open the chat section
+    navigate('/?chatbot=' + encodeURIComponent(path.title));
   };
   
   const handleAddNewChatbot = () => {
@@ -820,7 +828,11 @@ const LearningPaths = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" size="sm">
+                  <Button 
+                    className="w-full" 
+                    size="sm"
+                    onClick={() => handleStartChatting(path)}
+                  >
                     Start Chatting <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardFooter>
@@ -856,7 +868,11 @@ const LearningPaths = () => {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button className="w-full" size="sm">
+                      <Button 
+                        className="w-full" 
+                        size="sm"
+                        onClick={() => handleStartChatting(path)}
+                      >
                         Continue <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
