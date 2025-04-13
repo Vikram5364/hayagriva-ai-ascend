@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Sidebar,
@@ -28,6 +29,7 @@ import {
   User, 
   Code,
   Bot,
+  AppWindow,
 } from 'lucide-react';
 import HayagrivaLogoHorseUpdate from './HayagrivaLogoHorseUpdate';
 import AuthForms from './AuthForms';
@@ -63,6 +65,7 @@ const AppSidebar = () => {
                   <MobileSidebarItem icon={Bot} label="AI Chatbots" href="/chatbot" />
                   <MobileSidebarItem icon={FileText} label="Document Reader" href="/reader" />
                   <MobileSidebarItem icon={Code} label="Code Generation" href="/code" />
+                  <MobileSidebarItem icon={AppWindow} label="Web App Creator" href="/web-app-creator" />
                   <MobileSidebarItem icon={Github} label="GitHub Integration" href="#" />
                   <MobileSidebarItem icon={Layers} label="Subject Explorer" href="#" />
                 </div>
@@ -78,14 +81,12 @@ const AppSidebar = () => {
                 
                 {isLoggedIn && (
                   <div className="pt-4 border-t flex justify-between items-center">
-                    <div className="flex items-center">
-                      <Avatar className="h-8 w-8 mr-2">
-                        <User className="h-4 w-4" />
-                      </Avatar>
-                      <div className="text-sm">
-                        <p className="font-medium">User Name</p>
-                        <p className="text-xs text-muted-foreground">user@example.com</p>
-                      </div>
+                    <Avatar className="h-8 w-8 mr-2">
+                      <User className="h-4 w-4" />
+                    </Avatar>
+                    <div className="text-sm">
+                      <p className="font-medium">User Name</p>
+                      <p className="text-xs text-muted-foreground">user@example.com</p>
                     </div>
                     <Button variant="ghost" size="icon">
                       <Settings className="h-4 w-4" />
@@ -153,6 +154,15 @@ const AppSidebar = () => {
                     <a href="/code">
                       <Code className="h-4 w-4" />
                       <span>Code Generation</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Web App Creator">
+                    <a href="/web-app-creator">
+                      <AppWindow className="h-4 w-4" />
+                      <span>Web App Creator</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

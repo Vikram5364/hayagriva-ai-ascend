@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import AIChatbotPage from "./pages/LearningPathsPage";
 import DocumentReaderPage from "./pages/DocumentReaderPage";
 import CodeGenerationPage from "./pages/CodeGenerationPage";
+import WebAppCreatorPage from "./pages/WebAppCreatorPage";
 import AppSidebar from "./components/AppSidebar";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
                     <Route path="/chatbot" element={<AIChatbotPage />} />
                     <Route path="/reader" element={<DocumentReaderPage />} />
                     <Route path="/code" element={<CodeGenerationPage />} />
+                    <Route path="/web-app-creator" element={<WebAppCreatorPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </div>
