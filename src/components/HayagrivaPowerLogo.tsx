@@ -22,78 +22,86 @@ const HayagrivaPowerLogo = ({ className }: HayagrivaLogoProps) => {
         </linearGradient>
       </defs>
       
-      {/* Main shape - stylized from the uploaded image */}
+      {/* Horse head shape - stylized from the provided image */}
       <path 
-        d="M500 100
-           C400 100 300 150 250 250
-           L150 450
-           C125 500 150 550 200 575
-           L300 650
-           C325 675 300 700 275 725
-           L225 775
-           C200 800 225 850 275 825
-           L400 750
-           C450 725 500 750 525 800
-           L575 900
-           C600 950 650 950 675 900
-           L725 800
-           C750 750 800 725 850 750
-           L950 800
-           C1000 825 1000 775 975 750
-           L925 700
-           C900 675 875 650 900 600
-           L950 500
-           C975 450 950 400 900 375
-           L750 300
-           C700 275 650 250 600 200
-           L550 150
-           C525 125 525 100 500 100
-           Z" 
+        d="M500 150
+           C400 150 325 200 300 300
+           C275 400 290 450 325 500
+           C360 550 370 600 350 650
+           C330 700 300 750 325 800
+           C350 850 425 825 500 800
+           C575 825 650 850 675 800
+           C700 750 670 700 650 650
+           C630 600 640 550 675 500
+           C710 450 725 400 700 300
+           C675 200 600 150 500 150Z" 
         fill="url(#powerLogoGradient)"
         stroke="black"
         strokeWidth="10"
       />
       
-      {/* Inner details - abstract representation of the horse/flame concept */}
-      <path 
-        d="M500 300
-           C475 325 450 350 425 400
-           C400 450 425 500 475 525
-           C525 550 575 525 600 475
-           C625 425 600 375 550 350
-           C525 325 500 325 500 300Z"
-        fill="white"
-      />
+      {/* Eyes */}
+      <circle cx="425" cy="400" r="25" fill="white" />
+      <circle cx="575" cy="400" r="25" fill="white" />
+      <circle cx="425" cy="400" r="12" fill="black" />
+      <circle cx="575" cy="400" r="12" fill="black" />
       
-      {/* Lightning bolt accent */}
+      {/* Mane/flame elements */}
       <path 
-        d="M350 600
-           L400 500
-           L350 525
-           L375 450
-           L325 475
-           L350 400"
-        stroke="white"
+        d="M400 250
+           C375 200 390 150 415 100
+           C425 125 430 150 450 200
+           
+           M500 220
+           C500 170 510 120 525 70
+           C540 120 550 170 550 220
+           
+           M600 250
+           C625 200 610 150 585 100
+           C575 125 570 150 550 200"
+        stroke="gold"
         strokeWidth="15"
         strokeLinecap="round"
-        strokeLinejoin="round"
         fill="none"
       />
       
-      {/* Flame crown accent */}
+      {/* Nostril */}
       <path 
-        d="M650 400
-           L675 300
-           L700 350
-           L725 275
-           L750 350
-           L775 300
-           L800 400"
-        stroke="white"
-        strokeWidth="15"
+        d="M475 500
+           C485 510 515 510 525 500"
+        stroke="black"
+        strokeWidth="8"
         strokeLinecap="round"
-        strokeLinejoin="round"
         fill="none"
+      />
+      
+      {/* Mouth line */}
+      <path 
+        d="M450 550
+           C475 575 525 575 550 550"
+        stroke="black"
+        strokeWidth="5"
+        strokeLinecap="round"
+        fill="none"
+      />
+      
+      {/* Ears */}
+      <path 
+        d="M400 250
+           C375 225 350 200 340 150
+           C360 175 380 200 400 210"
+        fill="#8B5CF6"
+        stroke="black"
+        strokeWidth="5"
+      />
+      
+      <path 
+        d="M600 250
+           C625 225 650 200 660 150
+           C640 175 620 200 600 210"
+        fill="#8B5CF6"
+        stroke="black"
+        strokeWidth="5"
       />
     </svg>
   );
