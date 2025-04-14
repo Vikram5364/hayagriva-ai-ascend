@@ -1,22 +1,32 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import HayagrivaLogo from './HayagrivaLogo';
 import { User } from 'lucide-react';
+import VoiceAssistant from './VoiceAssistant';
 
 interface ChatProps {
   messages: Array<{
     role: string;
     content: string;
   }>;
+  onVoiceInput?: (text: string) => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ messages }) => {
+const Chat: React.FC<ChatProps> = ({ messages, onVoiceInput }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [latestAIMessage, setLatestAIMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    
+    // Get the latest AI message for voice reading
+    const assistantMessages = messages.filter(m => m.role === 'assistant');
+    if (assistantMessages.length > 0) {
+      const newest = assistantMessages[assistantMessages.length - 1];
+      setLatestAIMessage(newest.content);
+    }
   }, [messages]);
 
   if (messages.length === 0) {
@@ -27,6 +37,14 @@ const Chat: React.FC<ChatProps> = ({ messages }) => {
         <p className="text-muted-foreground max-w-md">
           Ask me anything about science, arts, engineering, or any subject. I'm here to assist with an Indian perspective.
         </p>
+        {onVoiceInput && (
+          <div className="mt-6">
+            <VoiceAssistant onVoiceInput={onVoiceInput} />
+            <p className="text-xs text-muted-foreground mt-2">
+              Click the microphone icon to start speaking
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -59,6 +77,12 @@ const Chat: React.FC<ChatProps> = ({ messages }) => {
           )}>
             {message.role === 'assistant' && <div className="message-indicator"></div>}
             <p className="text-sm">{message.content}</p>
+            
+            {message.role === 'assistant' && index === messages.length - 1 && (
+              <div className="mt-2">
+                <VoiceAssistant text={message.content} onVoiceInput={onVoiceInput} />
+              </div>
+            )}
           </div>
         </div>
       ))}

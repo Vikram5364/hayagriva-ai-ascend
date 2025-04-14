@@ -1,14 +1,21 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Volume2, VolumeX, Pause, Play } from 'lucide-react';
+import { Volume2, VolumeX, Pause, Play, Mic, MicOff } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 
-const VoiceAssistant = ({ text }: { text?: string }) => {
+interface VoiceAssistantProps {
+  text?: string;
+  onVoiceInput?: (text: string) => void;
+}
+
+const VoiceAssistant = ({ text, onVoiceInput }: VoiceAssistantProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,11 +33,46 @@ const VoiceAssistant = ({ text }: { text?: string }) => {
     
     populateVoices();
     
+    // Initialize speech recognition if browser supports it
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      
+      recognitionRef.current.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+        
+        // For the last result, if it's final, send it to the handler
+        const lastResultIndex = event.results.length - 1;
+        const lastResult = event.results[lastResultIndex];
+        if (lastResult.isFinal && onVoiceInput) {
+          onVoiceInput(lastResult[0].transcript);
+        }
+      };
+      
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+        toast({
+          title: "Voice Recognition Error",
+          description: `Error: ${event.error}. Please try again.`,
+          variant: "destructive"
+        });
+      };
+    }
+    
     // Cleanup
     return () => {
       synth.cancel();
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
     };
-  }, []);
+  }, [toast, onVoiceInput]);
 
   useEffect(() => {
     if (text && !utterance) {
@@ -115,6 +157,42 @@ const VoiceAssistant = ({ text }: { text?: string }) => {
     }
   };
 
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      toast({
+        title: "Not Supported",
+        description: "Voice recognition is not supported in this browser.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      toast({
+        title: "Voice Input Stopped",
+        description: "No longer listening for voice input."
+      });
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+        toast({
+          title: "Voice Input Active",
+          description: "Speak clearly into your microphone."
+        });
+      } catch (err) {
+        console.error('Error starting speech recognition:', err);
+        toast({
+          title: "Error",
+          description: "Failed to start voice recognition. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -140,6 +218,20 @@ const VoiceAssistant = ({ text }: { text?: string }) => {
           onClick={stopSpeech}
         >
           <VolumeX className="h-4 w-4" />
+        </Button>
+      )}
+
+      {onVoiceInput && (
+        <Button
+          variant={isListening ? "destructive" : "outline"}
+          size="icon"
+          onClick={toggleListening}
+          className="relative"
+        >
+          {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          {isListening && (
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+          )}
         </Button>
       )}
     </div>

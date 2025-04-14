@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,9 +25,7 @@ const Index = () => {
 
   const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
   const [input, setInput] = useState("");
-  const [isListening, setIsListening] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [speakResponse, setSpeakResponse] = useState(true);
   
   // Parse the URL parameters to check if we should show a specific chatbot
   useEffect(() => {
@@ -57,9 +54,6 @@ const Index = () => {
             initialMessage,
             { role: 'assistant', content: aiResponse }
           ]);
-          
-          // Automatically speak the AI's response
-          speakText(aiResponse);
         }, 1000);
       }, 100);
     }
@@ -70,40 +64,7 @@ const Index = () => {
   };
 
   const speakText = (text: string) => {
-    if (!speakResponse) return;
-    
-    const synth = window.speechSynthesis;
-    synth.cancel(); // Stop any current speaking
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Get all available voices
-    const voices = synth.getVoices();
-    
-    // Try to find an Indian English voice
-    const indianVoice = voices.find(voice => 
-      (voice.lang.includes('en-IN') || 
-       voice.name.includes('Indian') || 
-       voice.name.includes('Hindi'))
-    );
-    
-    // Use a male voice preferably with Indian accent, or fallback to any English voice
-    if (indianVoice) {
-      utterance.voice = indianVoice;
-    } else {
-      const englishVoice = voices.find(voice => 
-        voice.lang.includes('en') && voice.name.includes('Male')
-      );
-      if (englishVoice) {
-        utterance.voice = englishVoice;
-      }
-    }
-    
-    // Adjust parameters to simulate Indian accent if needed
-    utterance.rate = 0.9; // Slightly slower
-    utterance.pitch = 1.1; // Slightly higher pitch
-    
-    synth.speak(utterance);
+    // No longer needed here as it's handled by VoiceAssistant component
   };
 
   const handleSend = () => {
@@ -129,65 +90,16 @@ const Index = () => {
         ...newMessages,
         { role: 'assistant', content: aiResponse }
       ]);
-      
-      // Automatically speak the AI's response
-      speakText(aiResponse);
-      
-      // Notify user if this is the first message
-      if (newMessages.length === 1) {
-        toast({
-          title: "Voice Output Active",
-          description: "Hayagriva is now speaking. The voice output is automatic."
-        });
-      }
     }, 1000);
   };
 
-  // Initialize speech synthesis
-  useEffect(() => {
-    const synth = window.speechSynthesis;
-    
-    // Initialize voices
-    const populateVoices = () => {
-      synth.getVoices();
-    };
-
-    if (synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged = populateVoices;
-    }
-    
-    populateVoices();
-    
-    // Cleanup
-    return () => {
-      synth.cancel();
-    };
-  }, []);
-
-  // Speak new AI messages when they arrive
-  useEffect(() => {
-    const latestMessage = messages[messages.length - 1];
-    if (latestMessage && latestMessage.role === 'assistant') {
-      speakText(latestMessage.content);
-    }
-  }, [messages]);
-
-  const toggleListening = () => {
-    setIsListening(!isListening);
-    
-    if (!isListening) {
-      toast({
-        title: "Voice Input Activated",
-        description: "Hayagriva is now listening. Speak clearly to send your message."
-      });
-      
-      // Simulate voice recognition after 3 seconds
+  const handleVoiceInput = (text: string) => {
+    if (text.trim()) {
+      setInput(text);
+      // Automatically send the message after brief delay
       setTimeout(() => {
-        const recognizedText = "What is the concept of dharma in Indian philosophy?";
-          
-        setInput(recognizedText);
-        setIsListening(false);
-      }, 3000);
+        handleGeneralSend();
+      }, 500);
     }
   };
 
@@ -284,6 +196,7 @@ const Index = () => {
           
           <p className="text-center text-muted-foreground mb-16 max-w-2xl mx-auto">
             Start a conversation with Hayagriva and experience the future of AI assistance with an Indian perspective.
+            You can type your questions or simply speak naturally as if talking to a person!
           </p>
           
           <div className="max-w-4xl mx-auto">
@@ -294,7 +207,6 @@ const Index = () => {
                   <span className="font-medium">Hayagriva Assistant</span>
                 </div>
                 
-                {/* Voice toggle replaced with indication that voice is always on */}
                 <div className="flex items-center text-xs text-muted-foreground">
                   <span className="flex items-center">
                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1"></span>
@@ -303,18 +215,9 @@ const Index = () => {
                 </div>
               </div>
               
-              <Chat messages={messages} />
+              <Chat messages={messages} onVoiceInput={handleVoiceInput} />
               
-              <div className="p-4 border-t border-border flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={isListening ? "text-destructive" : ""}
-                  onClick={toggleListening}
-                >
-                  {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-                </Button>
-                
+              <div className="p-4 border-t border-border flex items-center gap-2">                
                 <Input
                   placeholder="Ask Hayagriva something..."
                   value={input}
