@@ -13,6 +13,7 @@ import DocumentReaderPage from "./pages/DocumentReaderPage";
 import CodeGenerationPage from "./pages/CodeGenerationPage";
 import WebAppCreatorPage from "./pages/WebAppCreatorPage";
 import AppSidebar from "./components/AppSidebar";
+import HayagrivaPowerLogo from "./components/HayagrivaPowerLogo";
 
 const queryClient = new QueryClient();
 
