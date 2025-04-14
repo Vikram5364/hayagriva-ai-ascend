@@ -19,6 +19,7 @@ const VoiceAssistant = ({ text, onVoiceInput, iconOnly = false, alwaysShowVoiceB
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const { toast } = useToast();
+  const recognitionRestartTimeout = useRef<number | null>(null);
 
   useEffect(() => {
     const synth = window.speechSynthesis;
@@ -36,56 +37,131 @@ const VoiceAssistant = ({ text, onVoiceInput, iconOnly = false, alwaysShowVoiceB
     populateVoices();
     
     // Initialize speech recognition if browser supports it
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      
-      recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join('');
+    const initSpeechRecognition = () => {
+      if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false; // Changed to false to avoid multiple recognitions
+        recognitionRef.current.interimResults = true;
         
-        // For the last result, if it's final, send it to the handler
-        const lastResultIndex = event.results.length - 1;
-        const lastResult = event.results[lastResultIndex];
-        if (lastResult.isFinal && onVoiceInput) {
-          onVoiceInput(lastResult[0].transcript);
-        }
-      };
-      
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error', event.error);
-        setIsListening(false);
-        toast({
-          title: "Voice Recognition Error",
-          description: `Error: ${event.error}. Please try again.`,
-          variant: "destructive"
-        });
-      };
-
-      recognitionRef.current.onend = () => {
-        if (isListening) {
-          // Restart recognition if it was still supposed to be listening
-          try {
-            recognitionRef.current?.start();
-          } catch (err) {
-            console.error('Error restarting speech recognition:', err);
+        recognitionRef.current.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join('');
+          
+          // For the last result, if it's final, send it to the handler
+          const lastResultIndex = event.results.length - 1;
+          const lastResult = event.results[lastResultIndex];
+          if (lastResult.isFinal && onVoiceInput) {
+            onVoiceInput(lastResult[0].transcript);
+            // Stop the recognition after getting a final result
+            if (recognitionRef.current) {
+              recognitionRef.current.stop();
+              // Reset listening state with a small delay to avoid UI flickering
+              setTimeout(() => {
+                setIsListening(false);
+              }, 500);
+            }
           }
-        }
-      };
-    }
+        };
+        
+        recognitionRef.current.onerror = (event) => {
+          console.error('Speech recognition error', event.error);
+          
+          // Only show toast for non-aborted errors to avoid annoying the user
+          if (event.error !== 'aborted') {
+            toast({
+              title: "Voice Recognition Error",
+              description: `Error: ${event.error}. Please try again.`,
+              variant: "destructive"
+            });
+          }
+          
+          setIsListening(false);
+          
+          // Clear any existing timeout
+          if (recognitionRestartTimeout.current !== null) {
+            window.clearTimeout(recognitionRestartTimeout.current);
+            recognitionRestartTimeout.current = null;
+          }
+        };
+
+        recognitionRef.current.onend = () => {
+          // Only try to restart if still in listening mode and not deliberately stopped
+          if (isListening) {
+            // Add a small delay before restarting to avoid rapid restarts
+            recognitionRestartTimeout.current = window.setTimeout(() => {
+              try {
+                if (recognitionRef.current && isListening) {
+                  recognitionRef.current.start();
+                }
+              } catch (err) {
+                console.error('Error restarting speech recognition:', err);
+                setIsListening(false);
+              }
+              recognitionRestartTimeout.current = null;
+            }, 300);
+          }
+        };
+      }
+    };
+    
+    initSpeechRecognition();
     
     // Cleanup
     return () => {
       synth.cancel();
       if (recognitionRef.current) {
-        recognitionRef.current.abort();
+        try {
+          recognitionRef.current.abort();
+        } catch (err) {
+          console.error('Error aborting speech recognition:', err);
+        }
+      }
+      if (recognitionRestartTimeout.current !== null) {
+        window.clearTimeout(recognitionRestartTimeout.current);
       }
     };
-  }, [toast, onVoiceInput, isListening]);
+  }, [toast, onVoiceInput]);
+
+  // Update the isListening effect to handle state changes properly
+  useEffect(() => {
+    const handleListeningStateChange = () => {
+      if (!recognitionRef.current) return;
+      
+      if (isListening) {
+        try {
+          recognitionRef.current.start();
+          toast({
+            title: "Voice Input Active",
+            description: "Speak clearly into your microphone."
+          });
+        } catch (err) {
+          console.error('Error starting speech recognition:', err);
+          setIsListening(false);
+          toast({
+            title: "Error",
+            description: "Failed to start voice recognition. Please try again.",
+            variant: "destructive"
+          });
+        }
+      } else {
+        try {
+          // Only try to stop if it's actually running
+          if (recognitionRef.current) {
+            recognitionRef.current.stop();
+          }
+        } catch (err) {
+          console.error('Error stopping speech recognition:', err);
+        }
+      }
+    };
+    
+    handleListeningStateChange();
+    
+    // No cleanup needed here as it's handled in the main useEffect
+  }, [isListening, toast]);
 
   useEffect(() => {
     if (text && !utterance) {
@@ -185,29 +261,15 @@ const VoiceAssistant = ({ text, onVoiceInput, iconOnly = false, alwaysShowVoiceB
       return;
     }
 
+    // Toggle listening state
+    setIsListening(!isListening);
+    
+    // Actual start/stop of recognition is handled in the useEffect
     if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
       toast({
         title: "Voice Input Stopped",
         description: "No longer listening for voice input."
       });
-    } else {
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-        toast({
-          title: "Voice Input Active",
-          description: "Speak clearly into your microphone."
-        });
-      } catch (err) {
-        console.error('Error starting speech recognition:', err);
-        toast({
-          title: "Error",
-          description: "Failed to start voice recognition. Please try again.",
-          variant: "destructive"
-        });
-      }
     }
   };
 
