@@ -52,7 +52,6 @@ const WebAppCreatorPage = () => {
   const codeRef = useRef<HTMLPreElement>(null);
 
   useEffect(() => {
-    // Simulate loading initial data
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -60,7 +59,6 @@ const WebAppCreatorPage = () => {
         { role: "assistant", content: "Welcome to the Hayagriva Web App Creator! I can help you design and generate code for your web application. What kind of app would you like to create?" }
       ]);
       
-      // Simulate some generation history
       setGenerationHistory([
         {
           id: "1",
@@ -93,13 +91,11 @@ const WebAppCreatorPage = () => {
     setGenerating(true);
     setProgress(0);
     
-    // Add user message
     setMessages(prev => [...prev, {
       role: "user",
       content: `Generate a ${appType} web app called "${appName}" with the following description: ${appDescription}. Use ${colorScheme} color scheme and include these features: ${features.join(", ")}.`
     }]);
 
-    // Simulate progress
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
@@ -110,19 +106,16 @@ const WebAppCreatorPage = () => {
       });
     }, 300);
 
-    // Simulate code generation
     setTimeout(() => {
       clearInterval(interval);
       setProgress(100);
       setGenerating(false);
       
-      // Add assistant response
       setMessages(prev => [...prev, {
         role: "assistant",
         content: `I've generated the code for "${appName}". You can preview it or download the source code.`
       }]);
 
-      // Set generated code (this is just a placeholder)
       setGeneratedCode(`import React from 'react';
 import { useState, useEffect } from 'react';
 
@@ -131,7 +124,6 @@ function ${appName.replace(/\s+/g, '')}() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch data
     fetchData()
       .then(result => {
         setData(result);
@@ -150,7 +142,6 @@ function ${appName.replace(/\s+/g, '')}() {
           <div className="loading">Loading...</div>
         ) : (
           <div className="content">
-            {/* App content would go here */}
             ${features.map(feature => `<section className="feature">${feature}</section>`).join('\n            ')}
           </div>
         )}
@@ -161,10 +152,8 @@ function ${appName.replace(/\s+/g, '')}() {
 
 export default ${appName.replace(/\s+/g, '')};`);
 
-      // Set preview URL (this is just a placeholder)
       setPreviewUrl(`https://placehold.co/800x600/${colorScheme === 'blue' ? '3b82f6' : colorScheme === 'purple' ? '8b5cf6' : colorScheme === 'green' ? '10b981' : 'f59e0b'}/ffffff?text=${encodeURIComponent(appName)}`);
       
-      // Add to history
       const newHistoryItem = {
         id: Date.now().toString(),
         name: appName,
@@ -175,9 +164,7 @@ export default ${appName.replace(/\s+/g, '')};`);
       
       setGenerationHistory(prev => [newHistoryItem, ...prev]);
       
-      // Switch to code tab
       setActiveTab("code");
-      
     }, 6000);
   };
 
@@ -233,12 +220,9 @@ export default ${appName.replace(/\s+/g, '')};`);
   };
 
   const handleChatMessage = (message: string) => {
-    // Add user message
     setMessages(prev => [...prev, { role: "user", content: message }]);
     
-    // Simulate AI thinking
     setTimeout(() => {
-      // Add assistant response
       setMessages(prev => [...prev, { 
         role: "assistant", 
         content: `I'll help you with "${message}". Let me suggest some features for your app based on your description.`
@@ -247,14 +231,10 @@ export default ${appName.replace(/\s+/g, '')};`);
   };
 
   const handleNavLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // Use dataset instead of directly accessing properties on the string
-    const navValue = e.currentTarget.dataset.nav;
-    const linkValue = e.currentTarget.dataset.link;
-    if (navValue && linkValue) {
-      // Now we can use the values safely
-      console.log(`Navigation: ${navValue}, Link: ${linkValue}`);
-      // Additional navigation logic...
-    }
+    const navValue = e.currentTarget.dataset.nav || '';
+    const linkValue = e.currentTarget.dataset.link || '';
+    
+    console.log(`Navigation: ${navValue}, Link: ${linkValue}`);
   };
 
   return (

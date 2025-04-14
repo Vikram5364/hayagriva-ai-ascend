@@ -7,9 +7,11 @@ import { useToast } from "@/components/ui/use-toast";
 interface VoiceAssistantProps {
   text?: string;
   onVoiceInput?: (text: string) => void;
+  iconOnly?: boolean;
+  alwaysShowVoiceButton?: boolean;
 }
 
-const VoiceAssistant = ({ text, onVoiceInput }: VoiceAssistantProps) => {
+const VoiceAssistant = ({ text, onVoiceInput, iconOnly = false, alwaysShowVoiceButton = false }: VoiceAssistantProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
@@ -63,6 +65,17 @@ const VoiceAssistant = ({ text, onVoiceInput }: VoiceAssistantProps) => {
           variant: "destructive"
         });
       };
+
+      recognitionRef.current.onend = () => {
+        if (isListening) {
+          // Restart recognition if it was still supposed to be listening
+          try {
+            recognitionRef.current?.start();
+          } catch (err) {
+            console.error('Error restarting speech recognition:', err);
+          }
+        }
+      };
     }
     
     // Cleanup
@@ -72,7 +85,7 @@ const VoiceAssistant = ({ text, onVoiceInput }: VoiceAssistantProps) => {
         recognitionRef.current.abort();
       }
     };
-  }, [toast, onVoiceInput]);
+  }, [toast, onVoiceInput, isListening]);
 
   useEffect(() => {
     if (text && !utterance) {
@@ -119,8 +132,13 @@ const VoiceAssistant = ({ text, onVoiceInput }: VoiceAssistantProps) => {
       };
       
       setUtterance(newUtterance);
+      
+      // Auto-play the text when it's set
+      synth.cancel();
+      synth.speak(newUtterance);
+      setIsSpeaking(true);
     }
-  }, [text, voices, toast, utterance]);
+  }, [text, voices, toast]);
 
   const toggleSpeech = () => {
     const synth = window.speechSynthesis;
@@ -193,35 +211,55 @@ const VoiceAssistant = ({ text, onVoiceInput }: VoiceAssistantProps) => {
     }
   };
 
-  return (
-    <div className="flex items-center gap-2">
+  if (iconOnly) {
+    return (
       <Button
-        variant="outline"
+        variant={isListening ? "destructive" : "outline"}
         size="icon"
-        onClick={toggleSpeech}
+        onClick={toggleListening}
         className="relative"
       >
-        {isSpeaking ? (
-          isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />
-        ) : (
-          <Volume2 className="h-4 w-4" />
-        )}
-        {isSpeaking && !isPaused && (
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+        {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+        {isListening && (
+          <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
         )}
       </Button>
-      
-      {isSpeaking && (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={stopSpeech}
-        >
-          <VolumeX className="h-4 w-4" />
-        </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      {(text || isSpeaking) && (
+        <>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleSpeech}
+            className="relative"
+          >
+            {isSpeaking ? (
+              isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />
+            ) : (
+              <Volume2 className="h-4 w-4" />
+            )}
+            {isSpeaking && !isPaused && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            )}
+          </Button>
+          
+          {isSpeaking && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={stopSpeech}
+            >
+              <VolumeX className="h-4 w-4" />
+            </Button>
+          )}
+        </>
       )}
 
-      {onVoiceInput && (
+      {(onVoiceInput && alwaysShowVoiceButton) && (
         <Button
           variant={isListening ? "destructive" : "outline"}
           size="icon"
