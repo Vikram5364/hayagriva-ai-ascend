@@ -1817,9 +1817,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        const page = e.target.dataset.page;
-        state.activeNavItem = page;
-        render();
+        const page = e.target.getAttribute('data-page');
+        if (page) {
+          state.activeNavItem = page;
+          render();
+        }
       });
     });
     
