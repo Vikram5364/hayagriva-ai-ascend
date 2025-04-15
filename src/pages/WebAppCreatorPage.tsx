@@ -231,8 +231,8 @@ export default ${appName.replace(/\s+/g, '')};`);
   };
 
   const handleNavLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const navValue = e.currentTarget.dataset.nav || '';
-    const linkValue = e.currentTarget.dataset.link || '';
+    const navValue = e.currentTarget.getAttribute('data-nav') || '';
+    const linkValue = e.currentTarget.getAttribute('data-link') || '';
     
     console.log(`Navigation: ${navValue}, Link: ${linkValue}`);
   };
