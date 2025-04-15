@@ -3,11 +3,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import HayagrivaLogo from './HayagrivaLogo';
-import { User } from 'lucide-react';
+import { User, Download } from 'lucide-react';
 import VoiceAssistant from './VoiceAssistant';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mic, Send } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
+import { generateChatbotCode } from '@/utils/codeGenerator';
 
 interface ChatProps {
   messages: Array<{
@@ -25,6 +27,7 @@ const Chat: React.FC<ChatProps> = ({ messages, onVoiceInput, isFloating = false 
   const [isListening, setIsListening] = useState(false);
   const [isExpanded, setIsExpanded] = useState(!isFloating);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -52,6 +55,34 @@ const Chat: React.FC<ChatProps> = ({ messages, onVoiceInput, isFloating = false 
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const handleDownloadCode = () => {
+    try {
+      const code = generateChatbotCode(messages);
+      const blob = new Blob([code], { type: 'text/javascript' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'hayagriva-chatbot.js';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Code downloaded successfully",
+        description: "You can now use the chatbot code in your own projects!",
+      });
+    } catch (error) {
+      console.error('Failed to download code:', error);
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: "There was a problem generating the code. Please try again.",
+      });
+    }
   };
 
   const renderChatContent = () => {
@@ -141,6 +172,16 @@ const Chat: React.FC<ChatProps> = ({ messages, onVoiceInput, isFloating = false 
             <Send className="h-4 w-4" />
           </Button>
           <VoiceAssistant onVoiceInput={onVoiceInput} iconOnly={true} alwaysShowVoiceButton={true} />
+          {messages.length > 0 && (
+            <Button 
+              size="icon" 
+              variant="outline" 
+              title="Download Chatbot Code" 
+              onClick={handleDownloadCode}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </>
     );
@@ -159,9 +200,22 @@ const Chat: React.FC<ChatProps> = ({ messages, onVoiceInput, isFloating = false 
         {isExpanded && (
           <div className="flex justify-between items-center p-2 border-b">
             <h3 className="font-medium text-sm">Hayagriva Assistant</h3>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={toggleExpanded}>
-              &times;
-            </Button>
+            <div className="flex items-center gap-1">
+              {messages.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-6 w-6 p-0" 
+                  title="Download Chatbot Code"
+                  onClick={handleDownloadCode}
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={toggleExpanded}>
+                &times;
+              </Button>
+            </div>
           </div>
         )}
         {renderChatContent()}
@@ -171,6 +225,21 @@ const Chat: React.FC<ChatProps> = ({ messages, onVoiceInput, isFloating = false 
 
   return (
     <div className="flex flex-col border rounded-lg overflow-hidden">
+      {isFloating || (
+        <div className="flex justify-between items-center p-2 border-b">
+          <h3 className="font-medium text-sm">Hayagriva Assistant</h3>
+          {messages.length > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleDownloadCode}
+              className="flex items-center gap-1 text-xs"
+            >
+              <Download className="h-3 w-3" /> Download Code
+            </Button>
+          )}
+        </div>
+      )}
       {renderChatContent()}
     </div>
   );

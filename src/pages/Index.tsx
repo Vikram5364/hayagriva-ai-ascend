@@ -6,7 +6,8 @@ import {
   Mic, 
   MicOff, 
   Send, 
-  ArrowDown
+  ArrowDown,
+  Download
 } from 'lucide-react';
 import HayagrivaLogoHorseUpdate from '@/components/HayagrivaLogoHorseUpdate';
 import Chat from '@/components/Chat';
@@ -17,6 +18,7 @@ import { Switch } from '@/components/ui/switch';
 import { Sun, Moon } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { generateChatbotCode } from '@/utils/codeGenerator';
 
 const Index = () => {
   const { theme, setTheme } = useTheme();
@@ -116,6 +118,34 @@ const Index = () => {
     }, 100);
   };
 
+  const handleDownloadChatbot = () => {
+    try {
+      const code = generateChatbotCode(messages);
+      const blob = new Blob([code], { type: 'text/javascript' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'hayagriva-chatbot.js';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Chatbot code downloaded successfully",
+        description: "You can now integrate the Hayagriva chatbot into your own projects!",
+      });
+    } catch (error) {
+      console.error('Failed to download code:', error);
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: "There was a problem generating the chatbot code. Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Theme Toggle */}
@@ -190,14 +220,27 @@ const Index = () => {
       {/* Chat Interface */}
       <section id="chat-section" className="py-16 px-4 bg-background">
         <div className="container mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">
-            <span className="gradient-text">Experience Hayagriva</span>
-          </h2>
-          
-          <p className="text-center text-muted-foreground mb-16 max-w-2xl mx-auto">
-            Start a conversation with Hayagriva and experience the future of AI assistance with an Indian perspective.
-            You can type your questions or simply speak naturally as if talking to a person!
-          </p>
+          <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold">
+                <span className="gradient-text">Experience Hayagriva</span>
+              </h2>
+              <p className="text-muted-foreground mt-2 max-w-2xl">
+                Start a conversation with Hayagriva and experience the future of AI assistance with an Indian perspective.
+              </p>
+            </div>
+            
+            {messages.length > 0 && (
+              <Button 
+                className="mt-4 md:mt-0 flex items-center gap-2" 
+                variant="outline"
+                onClick={handleDownloadChatbot}
+              >
+                <Download className="h-4 w-4" />
+                Download Chatbot Code
+              </Button>
+            )}
+          </div>
           
           <div className="max-w-4xl mx-auto">
             <div className="bg-card shadow-lg rounded-2xl border border-border overflow-hidden">
