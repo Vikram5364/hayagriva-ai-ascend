@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,163 +10,178 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Check, Copy, Download, Loader2, RefreshCw, Trash, Upload } from "lucide-react";
+import { AlertCircle, Check, Copy, Download, Loader2, RefreshCw, Trash, Upload, Sparkles, Play } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import Chat from "@/components/Chat";
 import HayagrivaPowerLogo from "@/components/HayagrivaPowerLogo";
+import { generateAppCode } from "@/utils/codeGenerator";
 
 const WebAppCreatorPage = () => {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState("design");
-  const [appName, setAppName] = useState("");
-  const [appDescription, setAppDescription] = useState("");
-  const [appType, setAppType] = useState("dashboard");
-  const [colorScheme, setColorScheme] = useState("blue");
-  const [features, setFeatures] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("create");
+  const [appPrompt, setAppPrompt] = useState("");
   const [generatedCode, setGeneratedCode] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [progress, setProgress] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [responsive, setResponsive] = useState(true);
-  const [accessibility, setAccessibility] = useState(true);
-  const [framework, setFramework] = useState("react");
-  const [cssFramework, setCssFramework] = useState("tailwind");
   const [generationHistory, setGenerationHistory] = useState<Array<{
     id: string;
     name: string;
     description: string;
     timestamp: string;
     preview: string;
+    prompt: string;
+    code: string;
   }>>([]);
 
   const codeRef = useRef<HTMLPreElement>(null);
+  const promptRef = useRef<HTMLTextAreaElement>(null);
+
+  // Framework and styling options (for advanced settings)
+  const [framework, setFramework] = useState("react");
+  const [cssFramework, setCssFramework] = useState("tailwind");
+  const [responsive, setResponsive] = useState(true);
+  const [accessibility, setAccessibility] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
       setMessages([
-        { role: "assistant", content: "Welcome to the Hayagriva Web App Creator! I can help you design and generate code for your web application. What kind of app would you like to create?" }
+        { 
+          role: "assistant", 
+          content: "Welcome to the Hayagriva Web App Creator! Just tell me what kind of web app you want to build, and I'll generate it for you. Be as descriptive as possible for better results." 
+        }
       ]);
       
+      // Load sample history
       setGenerationHistory([
         {
           id: "1",
           name: "Analytics Dashboard",
           description: "A responsive dashboard with charts and data visualization",
           timestamp: "2023-10-15T14:30:00",
-          preview: "https://placehold.co/600x400/3b82f6/ffffff?text=Analytics+Dashboard"
+          preview: "https://placehold.co/600x400/3b82f6/ffffff?text=Analytics+Dashboard",
+          prompt: "Create an analytics dashboard with charts and data visualization",
+          code: "// Sample analytics dashboard code"
         },
         {
           id: "2",
           name: "E-commerce Store",
           description: "Online store with product listings and shopping cart",
           timestamp: "2023-10-14T10:15:00",
-          preview: "https://placehold.co/600x400/8b5cf6/ffffff?text=E-commerce+Store"
+          preview: "https://placehold.co/600x400/8b5cf6/ffffff?text=E-commerce+Store",
+          prompt: "Create an e-commerce store with product listings and a shopping cart",
+          code: "// Sample e-commerce store code"
         }
       ]);
-    }, 1500);
+    }, 1000);
   }, []);
 
-  const handleGenerate = () => {
-    if (!appName || !appDescription) {
+  const handleGenerate = async () => {
+    if (!appPrompt.trim()) {
       toast({
         title: "Missing information",
-        description: "Please provide both app name and description.",
+        description: "Please provide a description of the app you want to create.",
         variant: "destructive"
       });
       return;
     }
 
+    // Extract app name from prompt for better UX
+    const nameMatch = appPrompt.match(/(?:create|build|make|develop|generate)\s+(?:an?|the)\s+(\w+(?:\s+\w+){0,3})/i);
+    const appName = nameMatch ? nameMatch[1] : "Web App";
+    
     setGenerating(true);
     setProgress(0);
     
     setMessages(prev => [...prev, {
       role: "user",
-      content: `Generate a ${appType} web app called "${appName}" with the following description: ${appDescription}. Use ${colorScheme} color scheme and include these features: ${features.join(", ")}.`
+      content: appPrompt
     }]);
 
+    // Simulate progress
     const interval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 100) {
+        if (prev >= 95) {
           clearInterval(interval);
-          return 100;
+          return 95;
         }
-        return prev + 5;
+        return prev + Math.random() * 10;
       });
     }, 300);
 
-    setTimeout(() => {
+    try {
+      // Generate app code based on prompt
+      setTimeout(() => {
+        // This would eventually be replaced with an actual AI code generation call
+        const generatedAppCode = generateAppCode(appPrompt, {
+          framework,
+          cssFramework,
+          responsive,
+          accessibility
+        });
+        
+        setGeneratedCode(generatedAppCode);
+
+        // Generate a random color for preview based on app type
+        const colorOptions = ['3b82f6', '8b5cf6', '10b981', 'f59e0b', 'ef4444', '8b5cf6'];
+        const randomColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+        
+        // Set preview URL
+        setPreviewUrl(`https://placehold.co/800x600/${randomColor}/ffffff?text=${encodeURIComponent(appName)}`);
+        
+        // Add to history
+        const newHistoryItem = {
+          id: Date.now().toString(),
+          name: appName,
+          description: appPrompt.length > 100 ? appPrompt.slice(0, 97) + '...' : appPrompt,
+          timestamp: new Date().toISOString(),
+          preview: `https://placehold.co/600x400/${randomColor}/ffffff?text=${encodeURIComponent(appName)}`,
+          prompt: appPrompt,
+          code: generatedAppCode
+        };
+        
+        setGenerationHistory(prev => [newHistoryItem, ...prev]);
+        
+        // Set progress to 100%
+        clearInterval(interval);
+        setProgress(100);
+        
+        // Add assistant response
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          content: `I've generated your ${appName} application! You can view the code, preview it, or download it to use in your projects.`
+        }]);
+        
+        setGenerating(false);
+        setActiveTab("code");
+      }, 3000);
+    } catch (error) {
       clearInterval(interval);
-      setProgress(100);
       setGenerating(false);
+      setProgress(0);
+      
+      toast({
+        title: "Generation failed",
+        description: "There was a problem generating your app. Please try again.",
+        variant: "destructive"
+      });
       
       setMessages(prev => [...prev, {
         role: "assistant",
-        content: `I've generated the code for "${appName}". You can preview it or download the source code.`
+        content: "I'm sorry, but I encountered an error while trying to generate your app. Please try again with a more specific description."
       }]);
-
-      setGeneratedCode(`import React from 'react';
-import { useState, useEffect } from 'react';
-
-function ${appName.replace(/\s+/g, '')}() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchData()
-      .then(result => {
-        setData(result);
-        setLoading(false);
-      });
-  }, []);
-
-  return (
-    <div className="app ${colorScheme}-theme">
-      <header>
-        <h1>${appName}</h1>
-        <p>${appDescription}</p>
-      </header>
-      <main>
-        {loading ? (
-          <div className="loading">Loading...</div>
-        ) : (
-          <div className="content">
-            ${features.map(feature => `<section className="feature">${feature}</section>`).join('\n            ')}
-          </div>
-        )}
-      </main>
-    </div>
-  );
-}
-
-export default ${appName.replace(/\s+/g, '')};`);
-
-      setPreviewUrl(`https://placehold.co/800x600/${colorScheme === 'blue' ? '3b82f6' : colorScheme === 'purple' ? '8b5cf6' : colorScheme === 'green' ? '10b981' : 'f59e0b'}/ffffff?text=${encodeURIComponent(appName)}`);
-      
-      const newHistoryItem = {
-        id: Date.now().toString(),
-        name: appName,
-        description: appDescription,
-        timestamp: new Date().toISOString(),
-        preview: previewUrl || `https://placehold.co/600x400/${colorScheme === 'blue' ? '3b82f6' : colorScheme === 'purple' ? '8b5cf6' : colorScheme === 'green' ? '10b981' : 'f59e0b'}/ffffff?text=${encodeURIComponent(appName)}`
-      };
-      
-      setGenerationHistory(prev => [newHistoryItem, ...prev]);
-      
-      setActiveTab("code");
-    }, 6000);
+    }
   };
 
   const handleCopyCode = () => {
@@ -184,20 +200,17 @@ export default ${appName.replace(/\s+/g, '')};`);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${appName.replace(/\s+/g, '-').toLowerCase()}.jsx`;
+      a.download = `hayagriva-app.jsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Code downloaded",
+        description: "Your app code has been downloaded successfully.",
+      });
     }
-  };
-
-  const handleFeatureToggle = (feature: string) => {
-    setFeatures(prev => 
-      prev.includes(feature) 
-        ? prev.filter(f => f !== feature) 
-        : [...prev, feature]
-    );
   };
 
   const handleDeleteHistory = (id: string) => {
@@ -209,10 +222,10 @@ export default ${appName.replace(/\s+/g, '')};`);
   };
 
   const handleLoadFromHistory = (item: any) => {
-    setAppName(item.name);
-    setAppDescription(item.description);
+    setAppPrompt(item.prompt);
+    setGeneratedCode(item.code);
     setPreviewUrl(item.preview);
-    setActiveTab("design");
+    setActiveTab("create");
     toast({
       title: "Project loaded",
       description: `"${item.name}" has been loaded for editing.`,
@@ -221,20 +234,30 @@ export default ${appName.replace(/\s+/g, '')};`);
 
   const handleChatMessage = (message: string) => {
     setMessages(prev => [...prev, { role: "user", content: message }]);
+    setAppPrompt(message);
     
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: `I'll help you with "${message}". Let me suggest some features for your app based on your description.`
+        content: `I'll help you create a web app based on: "${message}". Click the "Generate App" button when you're ready!`
       }]);
-    }, 1000);
+    }, 800);
   };
 
-  const handleNavLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const navValue = e.currentTarget.getAttribute('data-nav') || '';
-    const linkValue = e.currentTarget.getAttribute('data-link') || '';
-    
-    console.log(`Navigation: ${navValue}, Link: ${linkValue}`);
+  // Example app suggestions
+  const suggestions = [
+    "Create a task management app with dark mode",
+    "Build an e-commerce store with product listings and cart",
+    "Generate a personal portfolio website with contact form",
+    "Make a recipe finder app with search functionality",
+    "Design a fitness tracking dashboard with charts"
+  ];
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setAppPrompt(suggestion);
+    if (promptRef.current) {
+      promptRef.current.focus();
+    }
   };
 
   return (
@@ -258,134 +281,69 @@ export default ${appName.replace(/\s+/g, '')};`);
         <div className="md:col-span-2">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-3 mb-4">
-              <TabsTrigger value="design">Design</TabsTrigger>
+              <TabsTrigger value="create">Create</TabsTrigger>
               <TabsTrigger value="code">Code</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="design" className="space-y-4">
+            <TabsContent value="create" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>App Information</CardTitle>
-                  <CardDescription>Define the basic details of your web application</CardDescription>
+                  <CardTitle>Create Your Web App</CardTitle>
+                  <CardDescription>Describe the web app you want to create and I'll generate it for you</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="app-name">App Name</Label>
-                    <Input 
-                      id="app-name" 
-                      placeholder="Enter app name" 
-                      value={appName} 
-                      onChange={(e) => setAppName(e.target.value)} 
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="app-description">Description</Label>
+                    <Label htmlFor="app-prompt">App Description</Label>
                     <Textarea 
-                      id="app-description" 
-                      placeholder="Describe what your app does" 
-                      value={appDescription} 
-                      onChange={(e) => setAppDescription(e.target.value)} 
-                      rows={3}
+                      id="app-prompt" 
+                      ref={promptRef}
+                      placeholder="Describe the app you want to create in detail. Example: Create a task management app with categories, dark mode, and user authentication." 
+                      value={appPrompt} 
+                      onChange={(e) => setAppPrompt(e.target.value)} 
+                      rows={5}
+                      className="resize-none"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="app-type">App Type</Label>
-                    <Select value={appType} onValueChange={setAppType}>
-                      <SelectTrigger id="app-type">
-                        <SelectValue placeholder="Select app type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="dashboard">Dashboard</SelectItem>
-                        <SelectItem value="e-commerce">E-commerce</SelectItem>
-                        <SelectItem value="blog">Blog</SelectItem>
-                        <SelectItem value="portfolio">Portfolio</SelectItem>
-                        <SelectItem value="social">Social Network</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Color Scheme</Label>
-                    <div className="flex gap-2">
-                      {["blue", "purple", "green", "orange"].map((color) => (
-                        <div 
-                          key={color} 
-                          className={cn(
-                            "w-8 h-8 rounded-full cursor-pointer border-2",
-                            colorScheme === color ? "border-primary" : "border-transparent",
-                            color === "blue" && "bg-blue-500",
-                            color === "purple" && "bg-purple-500",
-                            color === "green" && "bg-green-500",
-                            color === "orange" && "bg-orange-500"
-                          )}
-                          onClick={() => setColorScheme(color)}
-                        />
+                    <Label>Need inspiration? Try these examples:</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {suggestions.map((suggestion, index) => (
+                        <Badge 
+                          key={index} 
+                          variant="outline" 
+                          className="cursor-pointer hover:bg-secondary transition-colors"
+                          onClick={() => handleSuggestionClick(suggestion)}
+                        >
+                          {suggestion}
+                        </Badge>
                       ))}
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Features</CardTitle>
-                  <CardDescription>Select the features you want in your app</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="feature-auth" 
-                        checked={features.includes("Authentication")}
-                        onCheckedChange={() => handleFeatureToggle("Authentication")}
-                      />
-                      <Label htmlFor="feature-auth">Authentication</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="feature-api" 
-                        checked={features.includes("API Integration")}
-                        onCheckedChange={() => handleFeatureToggle("API Integration")}
-                      />
-                      <Label htmlFor="feature-api">API Integration</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="feature-charts" 
-                        checked={features.includes("Charts & Graphs")}
-                        onCheckedChange={() => handleFeatureToggle("Charts & Graphs")}
-                      />
-                      <Label htmlFor="feature-charts">Charts & Graphs</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="feature-forms" 
-                        checked={features.includes("Form Handling")}
-                        onCheckedChange={() => handleFeatureToggle("Form Handling")}
-                      />
-                      <Label htmlFor="feature-forms">Form Handling</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="feature-dark" 
-                        checked={features.includes("Dark Mode")}
-                        onCheckedChange={() => handleFeatureToggle("Dark Mode")}
-                      />
-                      <Label htmlFor="feature-dark">Dark Mode</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="feature-notifications" 
-                        checked={features.includes("Notifications")}
-                        onCheckedChange={() => handleFeatureToggle("Notifications")}
-                      />
-                      <Label htmlFor="feature-notifications">Notifications</Label>
-                    </div>
+                <CardFooter className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
+                    {appPrompt.length} / 500 characters
                   </div>
-                </CardContent>
+                  <Button 
+                    onClick={handleGenerate} 
+                    disabled={generating || !appPrompt.trim()}
+                    className="gap-2"
+                  >
+                    {generating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Generate App
+                      </>
+                    )}
+                  </Button>
+                </CardFooter>
               </Card>
               
               {showAdvanced && (
@@ -446,27 +404,11 @@ export default ${appName.replace(/\s+/g, '')};`);
                 </Card>
               )}
               
-              <div className="flex justify-end">
-                <Button 
-                  onClick={handleGenerate} 
-                  disabled={generating || !appName || !appDescription}
-                >
-                  {generating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    "Generate App"
-                  )}
-                </Button>
-              </div>
-              
               {generating && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Generating your app...</span>
-                    <span className="text-sm">{progress}%</span>
+                    <span className="text-sm">{Math.round(progress)}%</span>
                   </div>
                   <Progress value={progress} />
                 </div>
@@ -478,7 +420,7 @@ export default ${appName.replace(/\s+/g, '')};`);
                 <CardHeader>
                   <CardTitle>Generated Code</CardTitle>
                   <CardDescription>
-                    Here's the code for your {appName} application
+                    Here's the code for your application
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -504,7 +446,7 @@ export default ${appName.replace(/\s+/g, '')};`);
                       </div>
                       <pre 
                         ref={codeRef}
-                        className="bg-secondary p-4 rounded-md overflow-x-auto text-sm"
+                        className="bg-secondary p-4 rounded-md overflow-x-auto text-sm h-[500px]"
                       >
                         <code>{generatedCode}</code>
                       </pre>
@@ -512,13 +454,13 @@ export default ${appName.replace(/\s+/g, '')};`);
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12">
                       <p className="text-muted-foreground mb-4">
-                        No code generated yet. Go to the Design tab to create your app.
+                        No code generated yet. Go to the Create tab to generate your app.
                       </p>
                       <Button 
                         variant="outline" 
-                        onClick={() => setActiveTab("design")}
+                        onClick={() => setActiveTab("create")}
                       >
-                        Go to Design
+                        Go to Create
                       </Button>
                     </div>
                   )}
@@ -531,7 +473,7 @@ export default ${appName.replace(/\s+/g, '')};`);
                 <CardHeader>
                   <CardTitle>App Preview</CardTitle>
                   <CardDescription>
-                    Visual preview of your {appName} application
+                    Visual preview of your application
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -539,9 +481,15 @@ export default ${appName.replace(/\s+/g, '')};`);
                     <div className="border rounded-md overflow-hidden">
                       <img 
                         src={previewUrl} 
-                        alt={`Preview of ${appName}`} 
+                        alt="App Preview" 
                         className="w-full h-auto"
                       />
+                      <div className="p-4 bg-secondary flex justify-center">
+                        <Button variant="outline" className="gap-2">
+                          <Play className="h-4 w-4" />
+                          Open Live Demo
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12">
@@ -550,9 +498,9 @@ export default ${appName.replace(/\s+/g, '')};`);
                       </p>
                       <Button 
                         variant="outline" 
-                        onClick={() => setActiveTab("design")}
+                        onClick={() => setActiveTab("create")}
                       >
-                        Go to Design
+                        Go to Create
                       </Button>
                     </div>
                   )}
@@ -656,9 +604,9 @@ export default ${appName.replace(/\s+/g, '')};`);
           
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Tip</AlertTitle>
+            <AlertTitle>Pro Tip</AlertTitle>
             <AlertDescription>
-              You can use the AI assistant to help you design your app with natural language.
+              For better results, be detailed in your app description. Include features, design preferences, and functionality.
             </AlertDescription>
           </Alert>
         </div>
