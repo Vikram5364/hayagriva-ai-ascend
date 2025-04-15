@@ -125,10 +125,12 @@ class HayagrivaBot {
    * Private: Create the chat interface elements
    */
   _createChatInterface() {
+    const botName = this.name || 'Hayagriva';
+    
     this.containerElement.innerHTML = \`
       <div class="hayagriva-chat">
         <div class="hayagriva-header">
-          <h3>${this.name} Assistant</h3>
+          <h3>\${botName} Assistant</h3>
           <button class="hayagriva-close-btn">&times;</button>
         </div>
         <div class="hayagriva-messages"></div>
