@@ -125,7 +125,13 @@ class HayagrivaBot {
    * Private: Create the chat interface elements
    */
   _createChatInterface() {
+    // Make sure 'name' property is safely accessed with a default value
     const botName = this.name || 'Hayagriva';
+    
+    if (!this.containerElement) {
+      console.error('Container element is not defined');
+      return;
+    }
     
     this.containerElement.innerHTML = \`
       <div class="hayagriva-chat">
@@ -266,7 +272,17 @@ class HayagrivaBot {
    * @param {string} content - The message content
    */
   _addMessageToChat(role, content) {
+    if (!this.containerElement) {
+      console.error('Container element is not defined');
+      return;
+    }
+    
     const messagesDiv = this.containerElement.querySelector('.hayagriva-messages');
+    if (!messagesDiv) {
+      console.error('Messages container not found');
+      return;
+    }
+    
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('hayagriva-message');
     messageDiv.classList.add(role === 'user' ? 'hayagriva-user-message' : 'hayagriva-assistant-message');
