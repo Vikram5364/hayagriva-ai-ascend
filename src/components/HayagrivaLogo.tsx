@@ -21,7 +21,7 @@ const HayagrivaLogo = ({ className }: HayagrivaLogoProps) => {
         </linearGradient>
       </defs>
       
-      {/* Stylized horse/cybernetic rabbit logo based on the uploaded image */}
+      {/* Stylized horse/cybernetic rabbit logo */}
       <path
         d="M500 200
            C380 190 280 240 220 350
@@ -89,9 +89,9 @@ const HayagrivaLogo = ({ className }: HayagrivaLogoProps) => {
         strokeWidth="5"
       />
       
-      {/* Eyes */}
-      <circle cx="400" cy="450" r="20" fill="url(#logoGradient)" />
-      <circle cx="600" cy="450" r="20" fill="url(#logoGradient)" />
+      {/* Eyes - slightly changed from circles to ovals */}
+      <ellipse cx="400" cy="450" rx="25" ry="20" fill="url(#logoGradient)" />
+      <ellipse cx="600" cy="450" rx="25" ry="20" fill="url(#logoGradient)" />
     </svg>
   );
 };
