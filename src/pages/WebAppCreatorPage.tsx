@@ -1,26 +1,20 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Check, Copy, Download, Loader2, RefreshCw, Trash, Upload, Sparkles, Play } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { cn } from "@/lib/utils";
 import Chat from "@/components/Chat";
 import HayagrivaPowerLogo from "@/components/HayagrivaPowerLogo";
 import { generateAppCode } from "@/utils/codeGenerator";
+
+// Import refactored components
+import AppPromptInput from "@/components/web-app-creator/AppPromptInput";
+import AdvancedSettings from "@/components/web-app-creator/AdvancedSettings";
+import GenerationProgress from "@/components/web-app-creator/GenerationProgress";
+import CodeView from "@/components/web-app-creator/CodeView";
+import AppPreview from "@/components/web-app-creator/AppPreview";
+import GenerationHistory from "@/components/web-app-creator/GenerationHistory";
+import ProTipAlert from "@/components/web-app-creator/ProTipAlert";
 
 const WebAppCreatorPage = () => {
   const [loading, setLoading] = useState(false);
@@ -123,7 +117,7 @@ const WebAppCreatorPage = () => {
     try {
       // Generate app code based on prompt
       setTimeout(() => {
-        // This would eventually be replaced with an actual AI code generation call
+        // Generate actual code based on the prompt
         const generatedAppCode = generateAppCode(appPrompt, {
           framework,
           cssFramework,
@@ -287,328 +281,65 @@ const WebAppCreatorPage = () => {
             </TabsList>
             
             <TabsContent value="create" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create Your Web App</CardTitle>
-                  <CardDescription>Describe the web app you want to create and I'll generate it for you</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="app-prompt">App Description</Label>
-                    <Textarea 
-                      id="app-prompt" 
-                      ref={promptRef}
-                      placeholder="Describe the app you want to create in detail. Example: Create a task management app with categories, dark mode, and user authentication." 
-                      value={appPrompt} 
-                      onChange={(e) => setAppPrompt(e.target.value)} 
-                      rows={5}
-                      className="resize-none"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Need inspiration? Try these examples:</Label>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {suggestions.map((suggestion, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="outline" 
-                          className="cursor-pointer hover:bg-secondary transition-colors"
-                          onClick={() => handleSuggestionClick(suggestion)}
-                        >
-                          {suggestion}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between items-center">
-                  <div className="text-sm text-muted-foreground">
-                    {appPrompt.length} / 500 characters
-                  </div>
-                  <Button 
-                    onClick={handleGenerate} 
-                    disabled={generating || !appPrompt.trim()}
-                    className="gap-2"
-                  >
-                    {generating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4" />
-                        Generate App
-                      </>
-                    )}
-                  </Button>
-                </CardFooter>
-              </Card>
+              <AppPromptInput 
+                appPrompt={appPrompt}
+                setAppPrompt={setAppPrompt}
+                generating={generating}
+                handleGenerate={handleGenerate}
+                promptRef={promptRef}
+                suggestions={suggestions}
+                handleSuggestionClick={handleSuggestionClick}
+              />
               
               {showAdvanced && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Advanced Settings</CardTitle>
-                    <CardDescription>Configure technical aspects of your app</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="framework">Framework</Label>
-                      <Select value={framework} onValueChange={setFramework}>
-                        <SelectTrigger id="framework">
-                          <SelectValue placeholder="Select framework" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="react">React</SelectItem>
-                          <SelectItem value="vue">Vue</SelectItem>
-                          <SelectItem value="angular">Angular</SelectItem>
-                          <SelectItem value="svelte">Svelte</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="css-framework">CSS Framework</Label>
-                      <Select value={cssFramework} onValueChange={setCssFramework}>
-                        <SelectTrigger id="css-framework">
-                          <SelectValue placeholder="Select CSS framework" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tailwind">Tailwind CSS</SelectItem>
-                          <SelectItem value="bootstrap">Bootstrap</SelectItem>
-                          <SelectItem value="material">Material UI</SelectItem>
-                          <SelectItem value="chakra">Chakra UI</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Switch 
-                        id="responsive" 
-                        checked={responsive}
-                        onCheckedChange={setResponsive}
-                      />
-                      <Label htmlFor="responsive">Responsive Design</Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Switch 
-                        id="accessibility" 
-                        checked={accessibility}
-                        onCheckedChange={setAccessibility}
-                      />
-                      <Label htmlFor="accessibility">Accessibility Features</Label>
-                    </div>
-                  </CardContent>
-                </Card>
+                <AdvancedSettings
+                  framework={framework}
+                  setFramework={setFramework}
+                  cssFramework={cssFramework}
+                  setCssFramework={setCssFramework}
+                  responsive={responsive}
+                  setResponsive={setResponsive}
+                  accessibility={accessibility}
+                  setAccessibility={setAccessibility}
+                />
               )}
               
-              {generating && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Generating your app...</span>
-                    <span className="text-sm">{Math.round(progress)}%</span>
-                  </div>
-                  <Progress value={progress} />
-                </div>
-              )}
+              {generating && <GenerationProgress progress={progress} />}
             </TabsContent>
             
             <TabsContent value="code">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Generated Code</CardTitle>
-                  <CardDescription>
-                    Here's the code for your application
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {generatedCode ? (
-                    <div className="relative">
-                      <div className="absolute right-2 top-2 flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          onClick={handleCopyCode}
-                          title="Copy code"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          onClick={handleDownloadCode}
-                          title="Download code"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <pre 
-                        ref={codeRef}
-                        className="bg-secondary p-4 rounded-md overflow-x-auto text-sm h-[500px]"
-                      >
-                        <code>{generatedCode}</code>
-                      </pre>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <p className="text-muted-foreground mb-4">
-                        No code generated yet. Go to the Create tab to generate your app.
-                      </p>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setActiveTab("create")}
-                      >
-                        Go to Create
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <CodeView 
+                generatedCode={generatedCode}
+                codeRef={codeRef}
+                handleCopyCode={handleCopyCode}
+                handleDownloadCode={handleDownloadCode}
+                setActiveTab={setActiveTab}
+              />
             </TabsContent>
             
             <TabsContent value="preview">
-              <Card>
-                <CardHeader>
-                  <CardTitle>App Preview</CardTitle>
-                  <CardDescription>
-                    Visual preview of your application
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {previewUrl ? (
-                    <div className="border rounded-md overflow-hidden">
-                      <img 
-                        src={previewUrl} 
-                        alt="App Preview" 
-                        className="w-full h-auto"
-                      />
-                      <div className="p-4 bg-secondary flex justify-center">
-                        <Button variant="outline" className="gap-2">
-                          <Play className="h-4 w-4" />
-                          Open Live Demo
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <p className="text-muted-foreground mb-4">
-                        No preview available yet. Generate your app first.
-                      </p>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setActiveTab("create")}
-                      >
-                        Go to Create
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <AppPreview 
+                previewUrl={previewUrl}
+                setActiveTab={setActiveTab}
+              />
             </TabsContent>
           </Tabs>
         </div>
         
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Assistant</CardTitle>
-              <CardDescription>Chat with Hayagriva for help</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Chat 
-                messages={messages} 
-                onVoiceInput={handleChatMessage}
-              />
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Input 
-                placeholder="Ask a question..." 
-                className="mr-2" 
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleChatMessage((e.target as HTMLInputElement).value);
-                    (e.target as HTMLInputElement).value = '';
-                  }
-                }}
-              />
-              <Button variant="secondary" size="sm">
-                Send
-              </Button>
-            </CardFooter>
-          </Card>
+          <Chat 
+            messages={messages} 
+            onVoiceInput={handleChatMessage}
+          />
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Generation History</CardTitle>
-              <CardDescription>Your previously generated apps</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : generationHistory.length > 0 ? (
-                <ScrollArea className="h-[300px]">
-                  <div className="space-y-4">
-                    {generationHistory.map((item) => (
-                      <div key={item.id} className="flex flex-col space-y-2">
-                        <div 
-                          className="relative cursor-pointer rounded-md overflow-hidden"
-                          onClick={() => handleLoadFromHistory(item)}
-                        >
-                          <img 
-                            src={item.preview} 
-                            alt={item.name} 
-                            className="w-full h-32 object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <Button variant="secondary" size="sm">
-                              Load Project
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium">{item.name}</h4>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(item.timestamp).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleDeleteHistory(item.id)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <Separator />
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <p className="text-muted-foreground mb-2">
-                    No generation history yet
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Your generated apps will appear here
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <GenerationHistory 
+            loading={loading}
+            generationHistory={generationHistory}
+            handleLoadFromHistory={handleLoadFromHistory}
+            handleDeleteHistory={handleDeleteHistory}
+          />
           
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Pro Tip</AlertTitle>
-            <AlertDescription>
-              For better results, be detailed in your app description. Include features, design preferences, and functionality.
-            </AlertDescription>
-          </Alert>
+          <ProTipAlert />
         </div>
       </div>
     </div>
