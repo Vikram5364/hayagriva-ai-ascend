@@ -3,11 +3,17 @@
 
 ## Project info
 
-This is the Hayagriva AI Ascend platform.
+This is the Hayagriva AI Ascend platform, powered by Lovable.
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
+
+**Use Lovable**
+
+Simply visit the Lovable project page and start prompting.
+
+Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
@@ -57,11 +63,12 @@ This project is built with:
 
 ## How can I deploy this project?
 
-The project can be deployed to any hosting service that supports static site hosting, such as:
-- Vercel
-- Netlify
-- GitHub Pages
+Simply open Lovable and click on Share -> Publish.
 
 ## Can I connect a custom domain to my project?
 
-Yes! You can connect a custom domain through your hosting provider's settings.
+Yes! You can connect a custom domain through Lovable.
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
