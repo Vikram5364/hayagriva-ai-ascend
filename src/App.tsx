@@ -13,6 +13,7 @@ import AIChatbotPage from "./pages/LearningPathsPage";
 import DocumentReaderPage from "./pages/DocumentReaderPage";
 import CodeGenerationPage from "./pages/CodeGenerationPage";
 import WebAppCreatorPage from "./pages/WebAppCreatorPage";
+import ResearchPaperPage from "./pages/ResearchPaperPage";
 import AppSidebar from "./components/AppSidebar";
 import HayagrivaPowerLogo from "./components/HayagrivaPowerLogo";
 import Chat from "./components/Chat";
@@ -60,6 +61,7 @@ const App = () => {
                       <Route path="/reader" element={<DocumentReaderPage />} />
                       <Route path="/code" element={<CodeGenerationPage />} />
                       <Route path="/web-app-creator" element={<WebAppCreatorPage />} />
+                      <Route path="/research-paper" element={<ResearchPaperPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                     

@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import Chat from "@/components/Chat";
 import HayagrivaPowerLogo from "@/components/HayagrivaPowerLogo";
-import { generateAppCode } from "@/utils/codeGenerator";
+import { generateAppCode, generateCode } from "@/utils/codeGenerator";
 
 // Import refactored components
 import AppPromptInput from "@/components/web-app-creator/AppPromptInput";
@@ -39,6 +39,7 @@ const WebAppCreatorPage = () => {
 
   const codeRef = useRef<HTMLPreElement>(null);
   const promptRef = useRef<HTMLTextAreaElement>(null);
+  const [livePreviewUrl, setLivePreviewUrl] = useState<string | null>(null);
 
   // Framework and styling options (for advanced settings)
   const [framework, setFramework] = useState("react");
@@ -117,13 +118,20 @@ const WebAppCreatorPage = () => {
     try {
       // Generate app code based on prompt
       setTimeout(() => {
-        // Generate actual code based on the prompt
-        const generatedAppCode = generateAppCode(appPrompt, {
-          framework,
-          cssFramework,
-          responsive,
-          accessibility
-        });
+        let generatedAppCode;
+        
+        // Determine if this is a code generation request or app generation request
+        if (/function|algorithm|code|write|script|program/i.test(appPrompt)) {
+          generatedAppCode = generateCode(appPrompt);
+        } else {
+          // Generate actual app code based on the prompt
+          generatedAppCode = generateAppCode(appPrompt, {
+            framework,
+            cssFramework,
+            responsive,
+            accessibility
+          });
+        }
         
         setGeneratedCode(generatedAppCode);
 
@@ -132,7 +140,11 @@ const WebAppCreatorPage = () => {
         const randomColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
         
         // Set preview URL
-        setPreviewUrl(`https://placehold.co/800x600/${randomColor}/ffffff?text=${encodeURIComponent(appName)}`);
+        const previewUrl = `https://placehold.co/800x600/${randomColor}/ffffff?text=${encodeURIComponent(appName)}`;
+        setPreviewUrl(previewUrl);
+        
+        // Set a dummy live preview URL (in a real implementation, this would be a deployed version)
+        setLivePreviewUrl(`https://hayagriva-preview-${Date.now()}.vercel.app`);
         
         // Add to history
         const newHistoryItem = {
@@ -238,6 +250,23 @@ const WebAppCreatorPage = () => {
     }, 800);
   };
 
+  const handleOpenLivePreview = () => {
+    if (livePreviewUrl) {
+      window.open(livePreviewUrl, '_blank');
+      
+      toast({
+        title: "Live preview opened",
+        description: "Your application preview has been opened in a new tab.",
+      });
+    } else {
+      toast({
+        title: "Preview not available",
+        description: "Please generate an app first to view a live preview.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Example app suggestions
   const suggestions = [
     "Create a task management app with dark mode",
@@ -321,6 +350,8 @@ const WebAppCreatorPage = () => {
               <AppPreview 
                 previewUrl={previewUrl}
                 setActiveTab={setActiveTab}
+                onOpenLiveDemo={handleOpenLivePreview}
+                hasLivePreview={!!livePreviewUrl}
               />
             </TabsContent>
           </Tabs>

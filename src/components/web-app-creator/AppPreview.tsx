@@ -7,9 +7,16 @@ import { Play } from "lucide-react";
 interface AppPreviewProps {
   previewUrl: string;
   setActiveTab: (value: string) => void;
+  onOpenLiveDemo?: () => void;
+  hasLivePreview?: boolean;
 }
 
-const AppPreview: React.FC<AppPreviewProps> = ({ previewUrl, setActiveTab }) => {
+const AppPreview: React.FC<AppPreviewProps> = ({ 
+  previewUrl, 
+  setActiveTab, 
+  onOpenLiveDemo,
+  hasLivePreview = false
+}) => {
   return (
     <Card>
       <CardHeader>
@@ -27,7 +34,12 @@ const AppPreview: React.FC<AppPreviewProps> = ({ previewUrl, setActiveTab }) => 
               className="w-full h-auto"
             />
             <div className="p-4 bg-secondary flex justify-center">
-              <Button variant="outline" className="gap-2">
+              <Button 
+                variant="outline" 
+                className="gap-2" 
+                onClick={onOpenLiveDemo}
+                disabled={!hasLivePreview}
+              >
                 <Play className="h-4 w-4" />
                 Open Live Demo
               </Button>

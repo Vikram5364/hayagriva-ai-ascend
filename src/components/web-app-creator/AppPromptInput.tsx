@@ -42,7 +42,7 @@ const AppPromptInput: React.FC<AppPromptInputProps> = ({
             value={appPrompt} 
             onChange={(e) => setAppPrompt(e.target.value)} 
             rows={5}
-            className="resize-none"
+            className="resize-y min-h-[100px] max-h-[300px]"
           />
         </div>
         
@@ -62,10 +62,7 @@ const AppPromptInput: React.FC<AppPromptInputProps> = ({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center">
-        <div className="text-sm text-muted-foreground">
-          {appPrompt.length} / 500 characters
-        </div>
+      <CardFooter className="flex justify-end">
         <Button 
           onClick={handleGenerate} 
           disabled={generating || !appPrompt.trim()}

@@ -9,7 +9,7 @@ const ProTipAlert: React.FC = () => {
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Pro Tip</AlertTitle>
       <AlertDescription>
-        For better results, be detailed in your app description. Include features, design preferences, and functionality.
+        For optimal results, be as detailed as possible in your app description. Include specific features, design preferences, and functionality you want in your application.
       </AlertDescription>
     </Alert>
   );
