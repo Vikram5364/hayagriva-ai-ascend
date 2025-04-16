@@ -1,22 +1,17 @@
-# Welcome to your Lovable project
+
+# Hayagriva AI Ascend
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/10f02e8e-e518-4007-9214-33493b19a998
+This is the Hayagriva AI Ascend platform.
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/10f02e8e-e518-4007-9214-33493b19a998) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -62,12 +57,11 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/10f02e8e-e518-4007-9214-33493b19a998) and click on Share -> Publish.
+The project can be deployed to any hosting service that supports static site hosting, such as:
+- Vercel
+- Netlify
+- GitHub Pages
 
-## Can I connect a custom domain to my Lovable project?
+## Can I connect a custom domain to my project?
 
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Yes! You can connect a custom domain through your hosting provider's settings.
