@@ -20,8 +20,10 @@ const WebAppCreatorContent = () => {
     setActiveTab,
     appPrompt,
     setAppPrompt,
+    generatedCode,
     setGeneratedCode,
     setPreviewUrl,
+    progress,
     setProgress,
     setLivePreviewUrl,
     generationHistory,
@@ -77,12 +79,13 @@ const WebAppCreatorContent = () => {
 
     // Simulate progress
     const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 95) {
+      setProgress((prev) => {
+        const newProgress = typeof prev === 'number' ? prev + Math.random() * 10 : 0;
+        if (newProgress >= 95) {
           clearInterval(interval);
           return 95;
         }
-        return prev + Math.random() * 10;
+        return newProgress;
       });
     }, 300);
 
@@ -128,7 +131,7 @@ const WebAppCreatorContent = () => {
           code: generatedAppCode
         };
         
-        setGenerationHistory(prev => [newHistoryItem, ...prev]);
+        setGenerationHistory((prev) => [newHistoryItem, ...prev as any[]]);
         
         // Set progress to 100%
         clearInterval(interval);
@@ -150,9 +153,9 @@ const WebAppCreatorContent = () => {
     }
   };
 
-  const handleCopyCode = (code: string) => {
-    if (code) {
-      navigator.clipboard.writeText(code);
+  const handleCopyCode = () => {
+    if (generatedCode) {
+      navigator.clipboard.writeText(generatedCode);
       toast({
         title: "Code copied",
         description: "The generated code has been copied to your clipboard.",
@@ -160,9 +163,9 @@ const WebAppCreatorContent = () => {
     }
   };
 
-  const handleDownloadCode = (code: string) => {
-    if (code) {
-      const blob = new Blob([code], { type: 'text/javascript' });
+  const handleDownloadCode = () => {
+    if (generatedCode) {
+      const blob = new Blob([generatedCode], { type: 'text/javascript' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -180,7 +183,7 @@ const WebAppCreatorContent = () => {
   };
 
   const handleDeleteHistory = (id: string) => {
-    setGenerationHistory(prev => prev.filter(item => item.id !== id));
+    setGenerationHistory((prev) => (prev as any[]).filter(item => item.id !== id));
     toast({
       title: "Project deleted",
       description: "The project has been removed from your history.",
@@ -232,8 +235,8 @@ const WebAppCreatorContent = () => {
         <div className="md:col-span-2">
           <WebAppTabs 
             handleGenerate={handleGenerate}
-            handleCopyCode={() => handleCopyCode(generatedCode)}
-            handleDownloadCode={() => handleDownloadCode(generatedCode)}
+            handleCopyCode={handleCopyCode}
+            handleDownloadCode={handleDownloadCode}
             handleOpenLivePreview={handleOpenLivePreview}
             suggestions={suggestions}
             handleSuggestionClick={handleSuggestionClick}
