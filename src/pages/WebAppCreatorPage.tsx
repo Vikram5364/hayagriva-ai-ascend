@@ -79,8 +79,10 @@ const WebAppCreatorContent = () => {
 
     // Simulate progress
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        const newProgress = typeof prev === 'number' ? prev + Math.random() * 10 : 0;
+      // Fix: Use proper type casting to ensure the function returns a number
+      setProgress((previousProgress) => {
+        const prevProgress = typeof previousProgress === 'number' ? previousProgress : 0;
+        const newProgress = prevProgress + Math.random() * 10;
         if (newProgress >= 95) {
           clearInterval(interval);
           return 95;
@@ -131,7 +133,11 @@ const WebAppCreatorContent = () => {
           code: generatedAppCode
         };
         
-        setGenerationHistory((prev) => [newHistoryItem, ...prev as any[]]);
+        // Fix: Properly type the state update function
+        setGenerationHistory((prevHistory) => {
+          // Type-safe way to handle the history array
+          return [newHistoryItem, ...(Array.isArray(prevHistory) ? prevHistory : [])];
+        });
         
         // Set progress to 100%
         clearInterval(interval);
@@ -183,7 +189,14 @@ const WebAppCreatorContent = () => {
   };
 
   const handleDeleteHistory = (id: string) => {
-    setGenerationHistory((prev) => (prev as any[]).filter(item => item.id !== id));
+    // Fix: Properly type the state update function
+    setGenerationHistory((prevHistory) => {
+      // Type-safe way to handle the history array filtering
+      return Array.isArray(prevHistory) 
+        ? prevHistory.filter(item => item.id !== id) 
+        : [];
+    });
+    
     toast({
       title: "Project deleted",
       description: "The project has been removed from your history.",
