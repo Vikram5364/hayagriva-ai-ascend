@@ -75,20 +75,20 @@ const WebAppCreatorContent = () => {
     const appName = nameMatch ? nameMatch[1] : "Web App";
     
     setGenerating(true);
-    setProgress(0);
+    setProgress(0); // Direct value assignment instead of updater function
 
     // Simulate progress
     const interval = setInterval(() => {
-      // Fix: Use proper type casting to ensure the function returns a number
-      setProgress((previousProgress) => {
-        const prevProgress = typeof previousProgress === 'number' ? previousProgress : 0;
-        const newProgress = prevProgress + Math.random() * 10;
-        if (newProgress >= 95) {
-          clearInterval(interval);
-          return 95;
-        }
-        return newProgress;
-      });
+      // Fix: Instead of using a function updater, calculate the new value first and pass it directly
+      const currentProgress = progress; // Get the current progress from state
+      const newProgress = currentProgress + Math.random() * 10;
+      
+      if (newProgress >= 95) {
+        clearInterval(interval);
+        setProgress(95); // Direct value assignment
+      } else {
+        setProgress(newProgress); // Direct value assignment
+      }
     }, 300);
 
     try {
@@ -133,11 +133,12 @@ const WebAppCreatorContent = () => {
           code: generatedAppCode
         };
         
-        // Fix: Properly type the state update function
-        setGenerationHistory((prevHistory) => {
-          // Type-safe way to handle the history array
-          return [newHistoryItem, ...(Array.isArray(prevHistory) ? prevHistory : [])];
-        });
+        // Fix: Create a new array with the existing history and the new item
+        const updatedHistory = [newHistoryItem];
+        if (Array.isArray(generationHistory)) {
+          updatedHistory.push(...generationHistory);
+        }
+        setGenerationHistory(updatedHistory); // Direct array assignment
         
         // Set progress to 100%
         clearInterval(interval);
@@ -189,13 +190,13 @@ const WebAppCreatorContent = () => {
   };
 
   const handleDeleteHistory = (id: string) => {
-    // Fix: Properly type the state update function
-    setGenerationHistory((prevHistory) => {
-      // Type-safe way to handle the history array filtering
-      return Array.isArray(prevHistory) 
-        ? prevHistory.filter(item => item.id !== id) 
-        : [];
-    });
+    // Fix: Filter the array first, then set it directly
+    if (!Array.isArray(generationHistory)) {
+      return;
+    }
+    
+    const filteredHistory = generationHistory.filter(item => item.id !== id);
+    setGenerationHistory(filteredHistory); // Direct array assignment
     
     toast({
       title: "Project deleted",
