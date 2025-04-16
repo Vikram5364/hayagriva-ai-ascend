@@ -1,7 +1,9 @@
 
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import HayagrivaLogo from "@/components/HayagrivaLogo";
+import { Home } from 'lucide-react';
 
 const NotFound = () => {
   return (
@@ -16,8 +18,11 @@ const NotFound = () => {
         Hayagriva is still learning all paths, but can guide you back home.
       </p>
       
-      <Button asChild>
-        <Link to="/">Return to Home</Link>
+      <Button asChild className="flex items-center gap-2">
+        <Link to="/">
+          <Home className="w-4 h-4" />
+          Return to Home
+        </Link>
       </Button>
     </div>
   );

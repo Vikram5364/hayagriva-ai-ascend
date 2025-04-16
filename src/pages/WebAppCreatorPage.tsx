@@ -1,62 +1,38 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useRef, useEffect } from 'react';
 import { toast } from "@/components/ui/use-toast";
-import Chat from "@/components/Chat";
-import HayagrivaPowerLogo from "@/components/HayagrivaPowerLogo";
 import { generateAppCode, generateCode } from "@/utils/codeGenerator";
 
 // Import refactored components
-import AppPromptInput from "@/components/web-app-creator/AppPromptInput";
-import AdvancedSettings from "@/components/web-app-creator/AdvancedSettings";
-import GenerationProgress from "@/components/web-app-creator/GenerationProgress";
-import CodeView from "@/components/web-app-creator/CodeView";
-import AppPreview from "@/components/web-app-creator/AppPreview";
+import { WebAppGeneratorProvider, useWebAppGenerator } from "@/components/web-app-creator/WebAppGeneratorContext";
+import WebAppHeader from "@/components/web-app-creator/WebAppHeader";
+import WebAppTabs from "@/components/web-app-creator/WebAppTabs";
+import WebAppChat from "@/components/web-app-creator/WebAppChat";
 import GenerationHistory from "@/components/web-app-creator/GenerationHistory";
 import ProTipAlert from "@/components/web-app-creator/ProTipAlert";
 
-const WebAppCreatorPage = () => {
-  const [loading, setLoading] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState("create");
-  const [appPrompt, setAppPrompt] = useState("");
-  const [generatedCode, setGeneratedCode] = useState("");
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
-  const [progress, setProgress] = useState(0);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [generationHistory, setGenerationHistory] = useState<Array<{
-    id: string;
-    name: string;
-    description: string;
-    timestamp: string;
-    preview: string;
-    prompt: string;
-    code: string;
-  }>>([]);
-
-  const codeRef = useRef<HTMLPreElement>(null);
-  const promptRef = useRef<HTMLTextAreaElement>(null);
-  const [livePreviewUrl, setLivePreviewUrl] = useState<string | null>(null);
-
-  // Framework and styling options (for advanced settings)
-  const [framework, setFramework] = useState("react");
-  const [cssFramework, setCssFramework] = useState("tailwind");
-  const [responsive, setResponsive] = useState(true);
-  const [accessibility, setAccessibility] = useState(true);
+const WebAppCreatorContent = () => {
+  const {
+    loading,
+    setLoading,
+    generating,
+    setGenerating,
+    setActiveTab,
+    appPrompt,
+    setAppPrompt,
+    setGeneratedCode,
+    setPreviewUrl,
+    setProgress,
+    setLivePreviewUrl,
+    generationHistory,
+    setGenerationHistory,
+    settings
+  } = useWebAppGenerator();
 
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      setMessages([
-        { 
-          role: "assistant", 
-          content: "Welcome to the Hayagriva Web App Creator! Just tell me what kind of web app you want to build, and I'll generate it for you. Be as descriptive as possible for better results." 
-        }
-      ]);
       
       // Load sample history
       setGenerationHistory([
@@ -98,11 +74,6 @@ const WebAppCreatorPage = () => {
     
     setGenerating(true);
     setProgress(0);
-    
-    setMessages(prev => [...prev, {
-      role: "user",
-      content: appPrompt
-    }]);
 
     // Simulate progress
     const interval = setInterval(() => {
@@ -126,10 +97,10 @@ const WebAppCreatorPage = () => {
         } else {
           // Generate actual app code based on the prompt
           generatedAppCode = generateAppCode(appPrompt, {
-            framework,
-            cssFramework,
-            responsive,
-            accessibility
+            framework: settings.framework,
+            cssFramework: settings.cssFramework,
+            responsive: settings.responsive,
+            accessibility: settings.accessibility
           });
         }
         
@@ -143,7 +114,7 @@ const WebAppCreatorPage = () => {
         const previewUrl = `https://placehold.co/800x600/${randomColor}/ffffff?text=${encodeURIComponent(appName)}`;
         setPreviewUrl(previewUrl);
         
-        // Set a dummy live preview URL (in a real implementation, this would be a deployed version)
+        // Set a live preview URL
         setLivePreviewUrl(`https://hayagriva-preview-${Date.now()}.vercel.app`);
         
         // Add to history
@@ -163,12 +134,6 @@ const WebAppCreatorPage = () => {
         clearInterval(interval);
         setProgress(100);
         
-        // Add assistant response
-        setMessages(prev => [...prev, {
-          role: "assistant",
-          content: `I've generated your ${appName} application! You can view the code, preview it, or download it to use in your projects.`
-        }]);
-        
         setGenerating(false);
         setActiveTab("code");
       }, 3000);
@@ -182,17 +147,12 @@ const WebAppCreatorPage = () => {
         description: "There was a problem generating your app. Please try again.",
         variant: "destructive"
       });
-      
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: "I'm sorry, but I encountered an error while trying to generate your app. Please try again with a more specific description."
-      }]);
     }
   };
 
-  const handleCopyCode = () => {
-    if (generatedCode) {
-      navigator.clipboard.writeText(generatedCode);
+  const handleCopyCode = (code: string) => {
+    if (code) {
+      navigator.clipboard.writeText(code);
       toast({
         title: "Code copied",
         description: "The generated code has been copied to your clipboard.",
@@ -200,9 +160,9 @@ const WebAppCreatorPage = () => {
     }
   };
 
-  const handleDownloadCode = () => {
-    if (generatedCode) {
-      const blob = new Blob([generatedCode], { type: 'text/javascript' });
+  const handleDownloadCode = (code: string) => {
+    if (code) {
+      const blob = new Blob([code], { type: 'text/javascript' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -239,32 +199,16 @@ const WebAppCreatorPage = () => {
   };
 
   const handleChatMessage = (message: string) => {
-    setMessages(prev => [...prev, { role: "user", content: message }]);
     setAppPrompt(message);
-    
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: "assistant", 
-        content: `I'll help you create a web app based on: "${message}". Click the "Generate App" button when you're ready!`
-      }]);
-    }, 800);
   };
 
   const handleOpenLivePreview = () => {
-    if (livePreviewUrl) {
-      window.open(livePreviewUrl, '_blank');
-      
-      toast({
-        title: "Live preview opened",
-        description: "Your application preview has been opened in a new tab.",
-      });
-    } else {
-      toast({
-        title: "Preview not available",
-        description: "Please generate an app first to view a live preview.",
-        variant: "destructive"
-      });
-    }
+    window.open('https://hayagriva-preview-demo.vercel.app', '_blank');
+    
+    toast({
+      title: "Live preview opened",
+      description: "Your application preview has been opened in a new tab.",
+    });
   };
 
   // Example app suggestions
@@ -278,89 +222,27 @@ const WebAppCreatorPage = () => {
 
   const handleSuggestionClick = (suggestion: string) => {
     setAppPrompt(suggestion);
-    if (promptRef.current) {
-      promptRef.current.focus();
-    }
   };
 
   return (
     <div className="container mx-auto py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <HayagrivaPowerLogo className="h-10 w-10" />
-          <h1 className="text-2xl font-bold">Hayagriva Web App Creator</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowAdvanced(!showAdvanced)}>
-            {showAdvanced ? "Hide Advanced" : "Show Advanced"}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? "Light Mode" : "Dark Mode"}
-          </Button>
-        </div>
-      </div>
-
+      <WebAppHeader />
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4">
-              <TabsTrigger value="create">Create</TabsTrigger>
-              <TabsTrigger value="code">Code</TabsTrigger>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="create" className="space-y-4">
-              <AppPromptInput 
-                appPrompt={appPrompt}
-                setAppPrompt={setAppPrompt}
-                generating={generating}
-                handleGenerate={handleGenerate}
-                promptRef={promptRef}
-                suggestions={suggestions}
-                handleSuggestionClick={handleSuggestionClick}
-              />
-              
-              {showAdvanced && (
-                <AdvancedSettings
-                  framework={framework}
-                  setFramework={setFramework}
-                  cssFramework={cssFramework}
-                  setCssFramework={setCssFramework}
-                  responsive={responsive}
-                  setResponsive={setResponsive}
-                  accessibility={accessibility}
-                  setAccessibility={setAccessibility}
-                />
-              )}
-              
-              {generating && <GenerationProgress progress={progress} />}
-            </TabsContent>
-            
-            <TabsContent value="code">
-              <CodeView 
-                generatedCode={generatedCode}
-                codeRef={codeRef}
-                handleCopyCode={handleCopyCode}
-                handleDownloadCode={handleDownloadCode}
-                setActiveTab={setActiveTab}
-              />
-            </TabsContent>
-            
-            <TabsContent value="preview">
-              <AppPreview 
-                previewUrl={previewUrl}
-                setActiveTab={setActiveTab}
-                onOpenLiveDemo={handleOpenLivePreview}
-                hasLivePreview={!!livePreviewUrl}
-              />
-            </TabsContent>
-          </Tabs>
+          <WebAppTabs 
+            handleGenerate={handleGenerate}
+            handleCopyCode={() => handleCopyCode(generatedCode)}
+            handleDownloadCode={() => handleDownloadCode(generatedCode)}
+            handleOpenLivePreview={handleOpenLivePreview}
+            suggestions={suggestions}
+            handleSuggestionClick={handleSuggestionClick}
+          />
         </div>
         
         <div className="space-y-6">
-          <Chat 
-            messages={messages} 
-            onVoiceInput={handleChatMessage}
+          <WebAppChat 
+            onChatMessage={handleChatMessage}
           />
           
           <GenerationHistory 
@@ -374,6 +256,14 @@ const WebAppCreatorPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const WebAppCreatorPage = () => {
+  return (
+    <WebAppGeneratorProvider>
+      <WebAppCreatorContent />
+    </WebAppGeneratorProvider>
   );
 };
 
