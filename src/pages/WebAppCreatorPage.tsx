@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { toast } from "@/components/ui/use-toast";
 import { generateAppCode, generateCode } from "@/utils/codeGenerator";
@@ -29,7 +28,8 @@ const WebAppCreatorContent = () => {
     setLivePreviewUrl,
     generationHistory,
     setGenerationHistory,
-    settings
+    settings,
+    updateSettings
   } = useWebAppGenerator();
   
   const [realtimeStats, setRealtimeStats] = useState({
@@ -56,7 +56,12 @@ const WebAppCreatorContent = () => {
           timestamp: "2023-10-15T14:30:00",
           preview: "https://placehold.co/600x400/3b82f6/ffffff?text=Analytics+Dashboard",
           prompt: "Create an analytics dashboard with charts and data visualization",
-          code: "// Sample analytics dashboard code"
+          code: "// Sample analytics dashboard code",
+          stats: {
+            linesOfCode: 250,
+            components: 8,
+            efficiency: 92
+          }
         },
         {
           id: "2",
@@ -65,7 +70,12 @@ const WebAppCreatorContent = () => {
           timestamp: "2023-10-14T10:15:00",
           preview: "https://placehold.co/600x400/8b5cf6/ffffff?text=E-commerce+Store",
           prompt: "Create an e-commerce store with product listings and a shopping cart",
-          code: "// Sample e-commerce store code"
+          code: "// Sample e-commerce store code",
+          stats: {
+            linesOfCode: 320,
+            components: 12,
+            efficiency: 88
+          }
         }
       ]);
     }, 1000);
@@ -138,7 +148,7 @@ const WebAppCreatorContent = () => {
 
     // Set up real-time progress updates
     progressInterval.current = window.setInterval(() => {
-      setProgress(prevProgress => {
+      setProgress((prevProgress) => {
         const increment = Math.random() * 5 + (prevProgress > 80 ? 0.5 : 3);
         const newProgress = prevProgress + increment;
         
@@ -163,12 +173,21 @@ const WebAppCreatorContent = () => {
           generatedAppCode = generateCode(appPrompt);
         } else {
           // Generate actual app code based on the prompt
-          generatedAppCode = generateAppCode(appPrompt, {
+          // Update to include features only if they're available
+          const appOptions = {
             framework: settings.framework,
             cssFramework: settings.cssFramework,
             responsive: settings.responsive,
-            accessibility: settings.accessibility,
-            features: requirements.features,
+            accessibility: settings.accessibility
+          };
+          
+          // Only add features if they exist in requirements
+          if (requirements.features && requirements.features.length > 0) {
+            updateSettings({ features: requirements.features });
+          }
+          
+          generatedAppCode = generateAppCode(appPrompt, {
+            ...appOptions,
             appType: requirements.appType
           });
         }

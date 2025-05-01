@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 interface AppSettings {
@@ -7,6 +6,7 @@ interface AppSettings {
   responsive: boolean;
   accessibility: boolean;
   darkMode: boolean;
+  features?: string[]; // Added features property
 }
 
 interface HistoryItem {
@@ -17,6 +17,11 @@ interface HistoryItem {
   preview: string;
   prompt: string;
   code: string;
+  stats?: { // Added stats property as optional
+    linesOfCode: number;
+    components: number;
+    efficiency: number;
+  };
 }
 
 interface WebAppGeneratorContextType {
@@ -50,6 +55,7 @@ const defaultSettings: AppSettings = {
   responsive: true,
   accessibility: true,
   darkMode: false,
+  features: [], // Initialize with empty array
 };
 
 const WebAppGeneratorContext = createContext<WebAppGeneratorContextType | undefined>(undefined);
