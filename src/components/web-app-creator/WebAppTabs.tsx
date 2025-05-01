@@ -1,12 +1,19 @@
 
 import React, { useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AppPromptInput from "./AppPromptInput";
-import AdvancedSettings from "./AdvancedSettings";
-import GenerationProgress from "./GenerationProgress";
-import CodeView from "./CodeView";
-import AppPreview from "./AppPreview";
 import { useWebAppGenerator } from './WebAppGeneratorContext';
+import AppPromptInput from './AppPromptInput';
+import CodeView from './CodeView';
+import AppPreview from './AppPreview';
+import GenerationProgress from './GenerationProgress';
+import AdvancedSettings from './AdvancedSettings';
+
+interface RealTimeStats {
+  linesOfCode: number;
+  components: number;
+  efficiency: number;
+  completionRate: number;
+}
 
 interface WebAppTabsProps {
   handleGenerate: () => void;
@@ -15,6 +22,8 @@ interface WebAppTabsProps {
   handleOpenLivePreview: () => void;
   suggestions: string[];
   handleSuggestionClick: (suggestion: string) => void;
+  realtimeStats?: RealTimeStats;
+  generating?: boolean;
 }
 
 const WebAppTabs: React.FC<WebAppTabsProps> = ({
@@ -24,28 +33,28 @@ const WebAppTabs: React.FC<WebAppTabsProps> = ({
   handleOpenLivePreview,
   suggestions,
   handleSuggestionClick,
+  realtimeStats,
+  generating
 }) => {
   const {
     activeTab,
     setActiveTab,
     appPrompt,
     setAppPrompt,
-    generating,
-    progress,
-    showAdvanced,
     generatedCode,
     previewUrl,
     livePreviewUrl,
-    settings,
-    updateSettings
+    progress,
+    showAdvanced,
+    setShowAdvanced
   } = useWebAppGenerator();
-
+  
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const codeRef = useRef<HTMLPreElement>(null);
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid grid-cols-3 mb-4">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <TabsList className="grid grid-cols-3">
         <TabsTrigger value="create">Create</TabsTrigger>
         <TabsTrigger value="code">Code</TabsTrigger>
         <TabsTrigger value="preview">Preview</TabsTrigger>
@@ -55,27 +64,24 @@ const WebAppTabs: React.FC<WebAppTabsProps> = ({
         <AppPromptInput 
           appPrompt={appPrompt}
           setAppPrompt={setAppPrompt}
-          generating={generating}
+          generating={generating || false}
           handleGenerate={handleGenerate}
           promptRef={promptRef}
           suggestions={suggestions}
           handleSuggestionClick={handleSuggestionClick}
         />
         
-        {showAdvanced && (
-          <AdvancedSettings
-            framework={settings.framework}
-            setFramework={(value) => updateSettings({ framework: value })}
-            cssFramework={settings.cssFramework}
-            setCssFramework={(value) => updateSettings({ cssFramework: value })}
-            responsive={settings.responsive}
-            setResponsive={(value) => updateSettings({ responsive: value })}
-            accessibility={settings.accessibility}
-            setAccessibility={(value) => updateSettings({ accessibility: value })}
+        {generating && (
+          <GenerationProgress 
+            progress={progress} 
+            realtimeStats={realtimeStats}
           />
         )}
         
-        {generating && <GenerationProgress progress={progress} />}
+        <AdvancedSettings 
+          showAdvanced={showAdvanced} 
+          setShowAdvanced={setShowAdvanced} 
+        />
       </TabsContent>
       
       <TabsContent value="code">
@@ -90,10 +96,10 @@ const WebAppTabs: React.FC<WebAppTabsProps> = ({
       
       <TabsContent value="preview">
         <AppPreview 
-          previewUrl={previewUrl}
-          setActiveTab={setActiveTab}
-          onOpenLiveDemo={handleOpenLivePreview}
-          hasLivePreview={!!livePreviewUrl}
+          previewUrl={previewUrl} 
+          livePreviewUrl={livePreviewUrl} 
+          handleOpenLivePreview={handleOpenLivePreview}
+          realtimeStats={realtimeStats}
         />
       </TabsContent>
     </Tabs>

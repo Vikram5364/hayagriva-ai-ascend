@@ -2,12 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import Chat from '@/components/Chat';
 import { useWebAppGenerator } from './WebAppGeneratorContext';
+import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 interface WebAppChatProps {
   onChatMessage: (message: string) => void;
+  generating?: boolean;
 }
 
-const WebAppChat: React.FC<WebAppChatProps> = ({ onChatMessage }) => {
+const WebAppChat: React.FC<WebAppChatProps> = ({ onChatMessage, generating }) => {
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
 
   // Initialize chat with welcome message
@@ -19,6 +22,19 @@ const WebAppChat: React.FC<WebAppChatProps> = ({ onChatMessage }) => {
       }
     ]);
   }, []);
+
+  // Add generating status message
+  useEffect(() => {
+    if (generating) {
+      setMessages(prev => [
+        ...prev, 
+        { 
+          role: "assistant", 
+          content: "I'm now generating your web application based on your description. You'll see real-time updates on the progress above." 
+        }
+      ]);
+    }
+  }, [generating]);
 
   const handleVoiceInput = (text: string) => {
     setMessages(prev => [...prev, { role: "user", content: text }]);
@@ -33,7 +49,24 @@ const WebAppChat: React.FC<WebAppChatProps> = ({ onChatMessage }) => {
     onChatMessage(text);
   };
 
-  return <Chat messages={messages} onVoiceInput={handleVoiceInput} />;
+  if (generating) {
+    return (
+      <Card className="p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <h3 className="font-semibold">AI Assistant</h3>
+        </div>
+        <Chat messages={messages} onVoiceInput={handleVoiceInput} />
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-4">
+      <h3 className="font-semibold mb-4">AI Assistant</h3>
+      <Chat messages={messages} onVoiceInput={handleVoiceInput} />
+    </Card>
+  );
 };
 
 export default WebAppChat;

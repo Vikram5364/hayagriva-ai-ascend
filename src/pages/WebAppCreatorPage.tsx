@@ -1,7 +1,8 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { toast } from "@/components/ui/use-toast";
 import { generateAppCode, generateCode } from "@/utils/codeGenerator";
+import { parseAppRequirements } from "@/utils/promptParser";
 
 // Import refactored components
 import { WebAppGeneratorProvider, useWebAppGenerator } from "@/components/web-app-creator/WebAppGeneratorContext";
@@ -30,6 +31,16 @@ const WebAppCreatorContent = () => {
     setGenerationHistory,
     settings
   } = useWebAppGenerator();
+  
+  const [realtimeStats, setRealtimeStats] = useState({
+    linesOfCode: 0,
+    components: 0,
+    efficiency: 0,
+    completionRate: 0
+  });
+
+  const progressInterval = useRef<number | null>(null);
+  const statsInterval = useRef<number | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -60,6 +71,47 @@ const WebAppCreatorContent = () => {
     }, 1000);
   }, []);
 
+  useEffect(() => {
+    // Cleanup intervals when component unmounts
+    return () => {
+      if (progressInterval.current) {
+        window.clearInterval(progressInterval.current);
+      }
+      if (statsInterval.current) {
+        window.clearInterval(statsInterval.current);
+      }
+    };
+  }, []);
+
+  // Update real-time statistics based on generation progress
+  useEffect(() => {
+    if (generating) {
+      if (statsInterval.current) {
+        window.clearInterval(statsInterval.current);
+      }
+      
+      statsInterval.current = window.setInterval(() => {
+        const progressPercentage = progress;
+        
+        // Calculate dynamic statistics based on progress
+        setRealtimeStats(prev => ({
+          linesOfCode: Math.floor(100 + (progressPercentage * 5)),
+          components: Math.floor(3 + (progressPercentage / 20)),
+          efficiency: Math.min(95, Math.floor(60 + (progressPercentage / 3))),
+          completionRate: Math.floor(progressPercentage)
+        }));
+        
+        if (progressPercentage >= 100) {
+          window.clearInterval(statsInterval.current!);
+        }
+      }, 200);
+    } else {
+      if (statsInterval.current) {
+        window.clearInterval(statsInterval.current);
+      }
+    }
+  }, [generating, progress]);
+
   const handleGenerate = async () => {
     if (!appPrompt.trim()) {
       toast({
@@ -70,29 +122,39 @@ const WebAppCreatorContent = () => {
       return;
     }
 
-    // Extract app name from prompt for better UX
-    const nameMatch = appPrompt.match(/(?:create|build|make|develop|generate)\s+(?:an?|the)\s+(\w+(?:\s+\w+){0,3})/i);
-    const appName = nameMatch ? nameMatch[1] : "Web App";
+    // Parse requirements from prompt
+    const requirements = parseAppRequirements(appPrompt);
+    
+    // Extract app name from requirements
+    const appName = requirements.appName || "Web App";
     
     setGenerating(true);
-    setProgress(0); // Direct value assignment instead of updater function
+    setProgress(0);
 
-    // Simulate progress
-    const interval = setInterval(() => {
-      // Fix: Instead of using a function updater, calculate the new value first and pass it directly
-      const currentProgress = progress; // Get the current progress from state
-      const newProgress = currentProgress + Math.random() * 10;
-      
-      if (newProgress >= 95) {
-        clearInterval(interval);
-        setProgress(95); // Direct value assignment
-      } else {
-        setProgress(newProgress); // Direct value assignment
-      }
+    // Clear any existing intervals
+    if (progressInterval.current) {
+      window.clearInterval(progressInterval.current);
+    }
+
+    // Set up real-time progress updates
+    progressInterval.current = window.setInterval(() => {
+      setProgress(prevProgress => {
+        const increment = Math.random() * 5 + (prevProgress > 80 ? 0.5 : 3);
+        const newProgress = prevProgress + increment;
+        
+        if (newProgress >= 98) {
+          window.clearInterval(progressInterval.current!);
+          return 98; // Hold at 98% until actual completion
+        }
+        return newProgress;
+      });
     }, 300);
 
     try {
-      // Generate app code based on prompt
+      // Simulate API call with timeout proportional to prompt complexity
+      const complexityFactor = appPrompt.length / 50;
+      const simulatedDelay = Math.max(2000, Math.min(4000, complexityFactor * 500));
+      
       setTimeout(() => {
         let generatedAppCode;
         
@@ -105,32 +167,62 @@ const WebAppCreatorContent = () => {
             framework: settings.framework,
             cssFramework: settings.cssFramework,
             responsive: settings.responsive,
-            accessibility: settings.accessibility
+            accessibility: settings.accessibility,
+            features: requirements.features,
+            appType: requirements.appType
           });
         }
         
         setGeneratedCode(generatedAppCode);
 
         // Generate a random color for preview based on app type
-        const colorOptions = ['3b82f6', '8b5cf6', '10b981', 'f59e0b', 'ef4444', '8b5cf6'];
-        const randomColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+        let themeColor;
+        switch (requirements.appType) {
+          case 'dashboard':
+            themeColor = '3b82f6'; // blue
+            break;
+          case 'ecommerce': 
+            themeColor = '8b5cf6'; // purple
+            break;
+          case 'blog':
+            themeColor = '10b981'; // green
+            break;
+          case 'portfolio':
+            themeColor = 'f59e0b'; // amber
+            break;
+          case 'social':
+            themeColor = 'ef4444'; // red
+            break;
+          case 'taskmanager':
+            themeColor = '8b5cf6'; // purple
+            break;
+          default:
+            const colorOptions = ['3b82f6', '8b5cf6', '10b981', 'f59e0b', 'ef4444'];
+            themeColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+        }
         
         // Set preview URL
-        const previewUrl = `https://placehold.co/800x600/${randomColor}/ffffff?text=${encodeURIComponent(appName)}`;
+        const previewUrl = `https://placehold.co/800x600/${themeColor}/ffffff?text=${encodeURIComponent(appName)}`;
         setPreviewUrl(previewUrl);
         
-        // Set a live preview URL
-        setLivePreviewUrl(`https://hayagriva-preview-${Date.now()}.vercel.app`);
+        // Set a live preview URL with unique identifier
+        const timestamp = Date.now();
+        setLivePreviewUrl(`https://hayagriva-preview-${timestamp}.vercel.app`);
         
         // Add to history
         const newHistoryItem = {
-          id: Date.now().toString(),
+          id: timestamp.toString(),
           name: appName,
           description: appPrompt.length > 100 ? appPrompt.slice(0, 97) + '...' : appPrompt,
           timestamp: new Date().toISOString(),
-          preview: `https://placehold.co/600x400/${randomColor}/ffffff?text=${encodeURIComponent(appName)}`,
+          preview: `https://placehold.co/600x400/${themeColor}/ffffff?text=${encodeURIComponent(appName)}`,
           prompt: appPrompt,
-          code: generatedAppCode
+          code: generatedAppCode,
+          stats: {
+            linesOfCode: realtimeStats.linesOfCode,
+            components: realtimeStats.components,
+            efficiency: realtimeStats.efficiency
+          }
         };
         
         // Fix: Create a new array with the existing history and the new item
@@ -138,17 +230,26 @@ const WebAppCreatorContent = () => {
         if (Array.isArray(generationHistory)) {
           updatedHistory.push(...generationHistory);
         }
-        setGenerationHistory(updatedHistory); // Direct array assignment
+        setGenerationHistory(updatedHistory);
         
         // Set progress to 100%
-        clearInterval(interval);
+        if (progressInterval.current) {
+          window.clearInterval(progressInterval.current);
+        }
         setProgress(100);
         
         setGenerating(false);
         setActiveTab("code");
-      }, 3000);
+        
+        toast({
+          title: "App generated successfully",
+          description: `Your ${appName} application has been created!`,
+        });
+      }, simulatedDelay);
     } catch (error) {
-      clearInterval(interval);
+      if (progressInterval.current) {
+        window.clearInterval(progressInterval.current);
+      }
       setGenerating(false);
       setProgress(0);
       
@@ -196,7 +297,7 @@ const WebAppCreatorContent = () => {
     }
     
     const filteredHistory = generationHistory.filter(item => item.id !== id);
-    setGenerationHistory(filteredHistory); // Direct array assignment
+    setGenerationHistory(filteredHistory);
     
     toast({
       title: "Project deleted",
@@ -243,7 +344,7 @@ const WebAppCreatorContent = () => {
 
   return (
     <div className="container mx-auto py-6">
-      <WebAppHeader />
+      <WebAppHeader realtimeStats={realtimeStats} generating={generating} />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
@@ -254,12 +355,15 @@ const WebAppCreatorContent = () => {
             handleOpenLivePreview={handleOpenLivePreview}
             suggestions={suggestions}
             handleSuggestionClick={handleSuggestionClick}
+            realtimeStats={realtimeStats}
+            generating={generating}
           />
         </div>
         
         <div className="space-y-6">
           <WebAppChat 
             onChatMessage={handleChatMessage}
+            generating={generating}
           />
           
           <GenerationHistory 
