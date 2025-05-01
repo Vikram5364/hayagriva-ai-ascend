@@ -146,18 +146,15 @@ const WebAppCreatorContent = () => {
       window.clearInterval(progressInterval.current);
     }
 
-    // Set up real-time progress updates
+    // Fix first error: Change setProgress to use a number directly instead of a function
     progressInterval.current = window.setInterval(() => {
-      setProgress((prevProgress) => {
-        const increment = Math.random() * 5 + (prevProgress > 80 ? 0.5 : 3);
-        const newProgress = prevProgress + increment;
-        
-        if (newProgress >= 98) {
-          window.clearInterval(progressInterval.current!);
-          return 98; // Hold at 98% until actual completion
-        }
-        return newProgress;
-      });
+      const increment = Math.random() * 5 + (progress > 80 ? 0.5 : 3);
+      const newProgress = Math.min(98, progress + increment);
+      setProgress(newProgress);
+      
+      if (newProgress >= 98) {
+        window.clearInterval(progressInterval.current!);
+      }
     }, 300);
 
     try {
@@ -173,12 +170,13 @@ const WebAppCreatorContent = () => {
           generatedAppCode = generateCode(appPrompt);
         } else {
           // Generate actual app code based on the prompt
-          // Update to include features only if they're available
+          // Fix second error: appType is now part of AppSettings
           const appOptions = {
             framework: settings.framework,
             cssFramework: settings.cssFramework,
             responsive: settings.responsive,
-            accessibility: settings.accessibility
+            accessibility: settings.accessibility,
+            appType: requirements.appType // Now valid because appType exists in AppSettings
           };
           
           // Only add features if they exist in requirements
@@ -186,10 +184,7 @@ const WebAppCreatorContent = () => {
             updateSettings({ features: requirements.features });
           }
           
-          generatedAppCode = generateAppCode(appPrompt, {
-            ...appOptions,
-            appType: requirements.appType
-          });
+          generatedAppCode = generateAppCode(appPrompt, appOptions);
         }
         
         setGeneratedCode(generatedAppCode);
@@ -229,6 +224,7 @@ const WebAppCreatorContent = () => {
         setLivePreviewUrl(`https://hayagriva-preview-${timestamp}.vercel.app`);
         
         // Add to history
+        // Fix third error: Ensure stats is always provided and not optional
         const newHistoryItem = {
           id: timestamp.toString(),
           name: appName,

@@ -6,7 +6,8 @@ interface AppSettings {
   responsive: boolean;
   accessibility: boolean;
   darkMode: boolean;
-  features?: string[]; // Added features property
+  features?: string[];
+  appType?: string; // Added appType property
 }
 
 interface HistoryItem {
@@ -17,7 +18,7 @@ interface HistoryItem {
   preview: string;
   prompt: string;
   code: string;
-  stats?: { // Added stats property as optional
+  stats: { // Changed from optional to required
     linesOfCode: number;
     components: number;
     efficiency: number;
@@ -56,6 +57,7 @@ const defaultSettings: AppSettings = {
   accessibility: true,
   darkMode: false,
   features: [], // Initialize with empty array
+  appType: "generic", // Default app type
 };
 
 const WebAppGeneratorContext = createContext<WebAppGeneratorContextType | undefined>(undefined);
